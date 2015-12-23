@@ -1,6 +1,6 @@
 from ebaysdk.trading import Connection as Trading
 from bs4 import BeautifulSoup
-import json
+import json, re
 
 ids = ['','','','']
 for fileName, index in [('appid',0), ('devid',1), ('certid',2), ('tokenid',3)]:
@@ -31,6 +31,50 @@ try:
     # print(json.dumps(response.dict(), indent=2))
     # print(response.dict())
     # print(response.reply)
+
+    fileHandler = open("target.html", "r")
+    data = fileHandler.read()
+    fileHandler.close()
+    
+    soup = BeautifulSoup(data, "html.parser")
+    rows = soup.find_all('table')
+    # for row in rows:
+    #     print("------------------------------------------------------------ TABLE NEW ------------------------------")
+    #     for divs in row.find_all('div'):
+    #         text = divs.get_text()
+    #         print(text)
+    #         print("------------------------------ DIV DONE ------------------------------")
+
+
+
+
+    count = 1
+    d = {}
+    i = 0
+    tmp = rows[5].find_all('div')
+    b = re.compile('\d+')
+    
+    while (i < len(tmp)):
+        name = tmp[i + 1].get_text().split()[0]
+        shipping_label_cost = tmp[i + 2].get_text()
+        n=tmp[i + 5].get_text()
+        m = b.search(n)
+        shipping_status, tracking_number = n[:m.span()[0]-1], n[m.span()[0]:m.span()[1]]
+        d[name] = {"ShippingLabelCost" : shipping_label_cost, "ShippingStatus": shipping_status, "TrackingNumber" :tracking_number}
+        i = i + 9
+
+    print(d["millerbritt"]["ShippingLabelCost"])
+
+    # for divs in rows[5].find_all('div'):
+    #     text = divs.get_text()
+        
+    #     print(text)
+    #     print("------------------------------ DIV DONE ------------------------------")
+
+
+    #print(rows[5].find_all('div').get_text())
+
+            
 
 
 except Exception as e:
