@@ -80,3 +80,14 @@ try:
 except Exception as e:
     print(e)
 
+
+# ref:
+http://stackoverflow.com/questions/250271/python-regex-how-to-get-positions-of-matches
+http://www.tutorialspoint.com/python/python_dictionary.htm
+http://stackoverflow.com/questions/23377533/python-beautifulsoup-parsing-table
+http://www.crummy.com/software/BeautifulSoup/bs4/doc/#the-name-argument
+http://www.pythonforbeginners.com/python-on-the-web/web-scraping-with-beautifulsoup/
+https://pymotw.com/2/json/
+http://developer.ebay.com/devzone/xml/docs/reference/ebay/getmyebayselling.html
+http://stackoverflow.com/questions/4990718/python-about-catching-any-exception
+http://www.tutorialspoint.com/python/python_files_io.htm
