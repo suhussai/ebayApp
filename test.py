@@ -9,28 +9,30 @@ for fileName, index in [('appid',0), ('devid',1), ('certid',2), ('tokenid',3)]:
     fileHandler.close()
 
 itemsSold = {}
-
+days = '3'
 try:    
     api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
     response = api.execute('GetMyeBaySelling', 
                            {'SoldList': 
-                            {'DurationInDays' : '3'}
+                            {'DurationInDays' : days} 
                         }
     )
-#    print(json.dumps(response.dict(), indent=2))
+    orderIDList = []
     for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
         orderId = transaction['Transaction']['OrderLineItemID']
+        orderIDList.append(orderId)
         itemsSold[orderId] = {} # create element
 
     response = api.execute('GetOrders',
-                           {'NumberOfDays':'3'}
+                           {'OrderIDArray': {'OrderID': orderIDList},
+                            'NumberOfDays': days}
     )
 
     for order in response.dict()['OrderArray']['Order']:
         orderID = order['OrderID'] 
         if orderID in itemsSold.keys():
             # it is a sold item
-            # and to itemsSold dict
+            # add to itemsSold dict
             for transaction in order['TransactionArray']['Transaction']: 
                 item_name = transaction['Item']['Title']
                 try:
