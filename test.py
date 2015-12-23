@@ -1,4 +1,5 @@
 from ebaysdk.trading import Connection as Trading
+from getShippingLabelInfo import shippingInfo
 import json, re
 
 ids = ['','','','']
@@ -7,33 +8,55 @@ for fileName, index in [('appid',0), ('devid',1), ('certid',2), ('tokenid',3)]:
     ids[index] = fileHandler.read().rstrip()
     fileHandler.close()
 
+itemsSold = {}
+
 try:    
     api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
-    # response = api.execute('GetMyeBaySelling', {'SoldList': {'DurationInDays' : '1'}})
-    # #print(json.dumps(response.dict(), indent=2))
-    # for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
-    #     name = transaction['Transaction']['Item']['Title']
-    #     try:
-    #         item_price = transaction['Transaction']['TotalPrice']['value']
-    #     except:
-    #         item_price = "Not Found"
+    response = api.execute('GetMyeBaySelling', 
+                           {'SoldList': 
+                            {'DurationInDays' : '3'}
+                        }
+    )
+#    print(json.dumps(response.dict(), indent=2))
+    for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
+        orderId = transaction['Transaction']['OrderLineItemID']
+        itemsSold[orderId] = {} # create element
 
-    #     print(name + ", " + item_price)
+    response = api.execute('GetOrders',
+                           {'NumberOfDays':'3'}
+    )
 
-        
+    for order in response.dict()['OrderArray']['Order']:
+        orderID = order['OrderID'] 
+        if orderID in itemsSold.keys():
+            # it is a sold item
+            # and to itemsSold dict
+            for transaction in order['TransactionArray']['Transaction']: 
+                item_name = transaction['Item']['Title']
+                try:
+                    item_tracking_number = transaction['ShippingDetails']['ShipmentTrackingDetails']['ShipmentTrackingNumber']
+                except Exception as e:
+                    item_tracking_number = "N\A"
+
+            item_total_price = order['Total']['value']
+            itemsSold[orderID]['ItemName'] = item_name
+            itemsSold[orderID]['ItemPrice'] = item_total_price
+            itemsSold[orderID]['ItemTrackingNumber'] = item_tracking_number
+
+    orderIDs = itemsSold.keys()
+    for orderID in orderIDs:
+        info = shippingInfo.get(itemsSold[orderID]['ItemTrackingNumber'], None)
+        if info is not None:
+            itemsSold[orderID]['ShippingStatus'] = info['ShippingStatus']
+            itemsSold[orderID]['BuyerName'] = info['BuyerName']
+            itemsSold[orderID]['ShippingLabelCost'] = info['ShippingLabelCost']
+
     
-
-    #response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction'][0]['Transaction']['Item']['Title']
-
-
-    # response = api.execute('GetOrders',{'NumberOfDays':'1'})
-    # print(json.dumps(response.dict(), indent=2))
-    # print(response.dict())
-    # print(response.reply)
+    for key, value in itemsSold.iteritems():        
+        print(key)
+        print(value)
 
             
-
-
 except Exception as e:
     print(e)
 

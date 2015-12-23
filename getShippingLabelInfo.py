@@ -23,9 +23,9 @@ while (i < len(shippingInfoRow)):
                           regexCompResult.span()[1]]
     )
     i = i + 9
-    shippingInfo[name] = {"ShippingLabelCost" : shipping_label_cost, 
-                          "ShippingStatus": shipping_status, 
-                          "TrackingNumber" :tracking_number}
+    shippingInfo[tracking_number] = {"ShippingLabelCost" : shipping_label_cost, 
+                                     "ShippingStatus": shipping_status, 
+                                     "BuyerName" : name}
 
-print(shippingInfo)
+#print(shippingInfo)
 #print(shippingInfo["millerbritt"]["ShippingLabelCost"])
