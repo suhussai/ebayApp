@@ -8,7 +8,7 @@ echo $file_date
 echo $cur_date
 if [ "$file_date" == "$cur_date" ]; then
 	echo "good"
-	mv ../My\ eBay.html .
+	mv ../My\ eBay.html target.html
 	i="2"
 else
 	bash getPage.sh
