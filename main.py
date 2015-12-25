@@ -39,11 +39,13 @@ try:
                     item_tracking_number = transaction['ShippingDetails']['ShipmentTrackingDetails']['ShipmentTrackingNumber']
                 except Exception as e:
                     item_tracking_number = "N\A"
-
+                    
+            order_date = order['CreatedTime'] # ex: 2015-12-16T21:13:54.000Z
             item_total_price = order['Total']['value']
             itemsSold[orderID]['ItemName'] = item_name
             itemsSold[orderID]['ItemPrice'] = item_total_price
             itemsSold[orderID]['ItemTrackingNumber'] = item_tracking_number
+            itemsSold[orderID]['ItemDate'] = order_date[:order_date.find("T")]
 
     orderIDs = itemsSold.keys()
     for orderID in orderIDs:
@@ -73,3 +75,4 @@ except Exception as e:
 # http://developer.ebay.com/devzone/xml/docs/reference/ebay/getmyebayselling.html
 # http://stackoverflow.com/questions/4990718/python-about-catching-any-exception
 # http://www.tutorialspoint.com/python/python_files_io.htm
+# http://www.tutorialspoint.com/python/string_find.htm
