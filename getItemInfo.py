@@ -9,7 +9,7 @@ for fileName, index in [('appid',0), ('devid',1), ('certid',2), ('tokenid',3)]:
     fileHandler.close()
 
 itemsSold = {}
-days = '3'
+days = '10'
 try:    
     api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
     response = api.execute('GetMyeBaySelling', 
@@ -45,7 +45,7 @@ try:
             itemsSold[orderID]['ItemName'] = item_name
             itemsSold[orderID]['ItemPrice'] = item_total_price
             itemsSold[orderID]['ItemTrackingNumber'] = item_tracking_number
-            itemsSold[orderID]['ItemDate'] = order_date[:order_date.find("T")]
+            itemsSold[orderID]['ItemDate'] = order_date #[:order_date.find("T")]
 
     orderIDs = itemsSold.keys()
     for orderID in orderIDs:
