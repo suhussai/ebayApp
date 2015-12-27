@@ -1,7 +1,9 @@
 from ebaysdk.trading import Connection as Trading
-import ShippingInfoModule
+from ShippingInfoModule import ShippingInfoClass
 from constants import days, ids
 import json, re
+
+si = ShippingInfoClass('ShippingInfo.json')
 
 itemsSold = {}
 try:    
@@ -43,7 +45,7 @@ try:
 
     orderIDs = itemsSold.keys()
     for orderID in orderIDs:
-        info = ShippingInfoModule.getLabelInfo(itemsSold[orderID]['ItemTrackingNumber'])
+        info = si.getLabelInfo(itemsSold[orderID]['ItemTrackingNumber'])
         if info is not None:
             itemsSold[orderID]['ShippingStatus'] = info['ShippingStatus']
             itemsSold[orderID]['BuyerName'] = info['BuyerName']
