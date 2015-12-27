@@ -1,15 +1,9 @@
 from ebaysdk.trading import Connection as Trading
-from getShippingLabelInfo import shippingInfo
+import ShippingInfoModule
+from constants import days, ids
 import json, re
 
-ids = ['','','','']
-for fileName, index in [('appid',0), ('devid',1), ('certid',2), ('tokenid',3)]:
-    fileHandler = open("IGNORE_" + fileName, "r")
-    ids[index] = fileHandler.read().rstrip()
-    fileHandler.close()
-
 itemsSold = {}
-days = '10'
 try:    
     api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
     response = api.execute('GetMyeBaySelling', 
@@ -49,7 +43,7 @@ try:
 
     orderIDs = itemsSold.keys()
     for orderID in orderIDs:
-        info = shippingInfo.get(itemsSold[orderID]['ItemTrackingNumber'], None)
+        info = ShippingInfoModule.getLabelInfo(itemsSold[orderID]['ItemTrackingNumber'])
         if info is not None:
             itemsSold[orderID]['ShippingStatus'] = info['ShippingStatus']
             itemsSold[orderID]['BuyerName'] = info['BuyerName']
