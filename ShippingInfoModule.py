@@ -116,4 +116,8 @@ class ShippingInfoClass:
             print("Can update")
             return True
 
-    
+
+# refs
+# https://docs.python.org/2/tutorial/classes.html
+# http://www.tutorialspoint.com/python/python_files_io.htm
+# http://www.diveintopython3.net/serializing.html   
