@@ -36,7 +36,7 @@ class ShippingInfoClass:
                         self.ShippingInfo["update_file"]["file_size"]
 
         
-        json.dump(self.ShippingInfo, fileHandler, indent=2)
+        json.dump(self.ShippingInfo, fileHandler)
         fileHandler.close()
         
     def update_ShippingInfo_and_file(self):
