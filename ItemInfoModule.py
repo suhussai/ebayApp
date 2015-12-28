@@ -27,37 +27,48 @@ class ItemInfoClass:
                            )
         orderIDList = []
         newItemsSold = {}
+        recorded_keys = self.ItemsSold.keys()
         for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
             orderId = transaction['Transaction']['OrderLineItemID']
-            orderIDList.append(orderId)
-            newItemsSold[orderId] = self.ItemsSold.get(orderId, {})
+            if orderId not in recorded_keys:
+                orderIDList.append(orderId)
+                newItemsSold[orderId] = self.ItemsSold.get(orderId, {})
+            # else:
+            #     print(str(orderId) + " already recorded in:" +  str(recorded_keys))
             
-
+                
+        #print("Found " + str(len(orderIDList)) + " new items.")
         # orderIDList consists of the order ID of 
         # the items sold, remove the order item 
         # ids that we already have records for
         # in the json file to reduce operation time
-        for key in self.ItemsSold.keys():
-            if key in orderIDList:
-                print("removed key is " + key)
-                orderIDList.remove(key)
+
                 
         if len(orderIDList) == 0:
             # no updating required
             # we have up to date
             # item records
             return
-    
-        response = api.execute('GetOrders',
-                    {'OrderIDArray': {'OrderID': orderIDList},
-                    'NumberOfDays': days}
-                    )
+            
+        HasMoreOrders = True
+        pageNumber = 0
+        while (HasMoreOrders):
+            pageNumber = pageNumber + 1
+            #print("Reading page " + str(pageNumber))
+            response = api.execute('GetOrders',
+                                   {'OrderIDArray': {'OrderID': orderIDList},
+                                    'NumberOfDays': days,
+                                    'Pagination' : {'EntriesPerPage': 100, 'PageNumber': pageNumber}}
+            )
+            if 'false' in response.dict()['HasMoreOrders']:
+                HasMoreOrders = False
+            else:
+                HasMoreOrders = True
 
-        for order in response.dict()['OrderArray']['Order']:
-            orderID = order['OrderID'] 
-            if orderID in newItemsSold.keys():
-                # it is a sold item
-                # add to self.ItemsSold dict
+            #print("Response for " + str(len(response.dict()['OrderArray']['Order'])) + " order IDs")
+            for order in response.dict()['OrderArray']['Order']:
+                orderID = order['OrderID'] 
+                #if orderID in newItemsSold.keys():
                 for transaction in order['TransactionArray']['Transaction']: 
                     item_name = transaction['Item']['Title']
                     try:
@@ -71,15 +82,16 @@ class ItemInfoClass:
                 newItemsSold[orderID]['ItemTrackingNumber'] = item_tracking_number
                 newItemsSold[orderID]['ItemDate'] = order_date #[:order_date.find("T")]
             
-        orderIDs = newItemsSold.keys()
-        for orderID in orderIDs:
-            info = self.si.getLabelInfo(newItemsSold[orderID].get('ItemTrackingNumber', ''))
-            if info is not None:
-                newItemsSold[orderID]['ShippingStatus'] = info['ShippingStatus']
-                newItemsSold[orderID]['BuyerName'] = info['BuyerName']
-                newItemsSold[orderID]['ShippingLabelCost'] = info['ShippingLabelCost']
+            orderIDs = newItemsSold.keys()
+            for orderID in orderIDs:
+                info = self.si.getLabelInfo(newItemsSold[orderID].get('ItemTrackingNumber', ''))
+                if info is not None:
+                    newItemsSold[orderID]['ShippingStatus'] = info['ShippingStatus']
+                    newItemsSold[orderID]['BuyerName'] = info['BuyerName']
+                    newItemsSold[orderID]['ShippingLabelCost'] = info['ShippingLabelCost']            
                 
         self.ItemsSold.update(newItemsSold)
+
         self.update_json_file()
     
         # for key, value in self.ItemsSold.iteritems():        
