@@ -39,9 +39,14 @@ class ItemsHeldClass:
                 long_name = values[0]
                 short_name = values[1]
                 cost_of_item = values[2]
-                self.ItemsHeld[long_name] = {'short_name': short_name,
+                self.ItemsHeld[long_name.replace(" ","")] = {'long_name': long_name,
+                                                   'short_name': short_name,
                                              'cost_of_item': cost_of_item
-                                        }                
+                                        }               
+            else:
+                print("found problem line " + line)
+        s = 'TWO WHEEL CENTER HUB CAPS For 07-15 CADILLAC ESCALADE 22 " PLAIN  CREST  9596649'.replace(" ","")
+        print(self.ItemsHeld.get(s), "Nope")
         self.update_json_file()
     
 
