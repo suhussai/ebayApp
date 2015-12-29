@@ -110,10 +110,10 @@ class ShippingInfoClass:
         current_files_time_last_modified = os.path.getmtime(targetHtmlFile)
         current_files_size = os.path.getsize(targetHtmlFile)
         if str(current_files_time_last_modified) == self.last_files_time_last_modified and str(current_files_size) == self.last_files_size:
-            print("Can NOT update")
+            #print("Can NOT update")
             return False
         else:
-            print("Can update")
+            print("Can update, updating!!!")
             return True
 
 
