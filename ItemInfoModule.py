@@ -65,16 +65,22 @@ class ItemInfoClass:
             else:
                 HasMoreOrders = True
 
+            #orderIDList = ['252139120978-1743240659015']
             #print("Response for " + str(len(response.dict()['OrderArray']['Order'])) + " order IDs")
             for order in response.dict()['OrderArray']['Order']:
                 orderID = order['OrderID'] 
                 #if orderID in newItemsSold.keys():
                 for transaction in order['TransactionArray']['Transaction']: 
                     item_name = transaction['Item']['Title']
-                    try:
-                        item_tracking_number = transaction['ShippingDetails']['ShipmentTrackingDetails']['ShipmentTrackingNumber']
-                    except Exception as e:
-                        item_tracking_number = "N\A"                    
+                    shipping_details = transaction['ShippingDetails']['ShipmentTrackingDetails']
+                    item_tracking_number = []
+
+                    if type(shipping_details) is not  list:
+                        shipping_details = [shipping_details]
+
+                    for shipping_detail in shipping_details:
+                        item_tracking_number.append(shipping_detail['ShipmentTrackingNumber'])
+
                 order_date = order['CreatedTime'] # ex: 2015-12-16T21:13:54.000Z
                 item_total_price = order['Total']['value']
                 newItemsSold[orderID]['ItemName'] = item_name
@@ -84,12 +90,31 @@ class ItemInfoClass:
             
             orderIDs = newItemsSold.keys()
             for orderID in orderIDs:
-                info = self.si.getLabelInfo(newItemsSold[orderID].get('ItemTrackingNumber', ''))
-                if info is not None:
-                    newItemsSold[orderID]['ShippingStatus'] = info['ShippingStatus']
-                    newItemsSold[orderID]['BuyerName'] = info['BuyerName']
-                    newItemsSold[orderID]['ShippingLabelCost'] = info['ShippingLabelCost']            
+                tracking_numbers = newItemsSold[orderID].get('ItemTrackingNumber', [])
+                #print(tracking_numbers)
+                tracking_numbers_dict = {}
+                for tracking_number in tracking_numbers:
+                    info = self.si.getLabelInfo(tracking_number)
+                    if info is not None and "Void" not in info['ShippingStatus']:
+                        tracking_numbers_dict[float(info['ShippingLabelCost'][1:])] = {'ShippingLabelCost': info['ShippingLabelCost'],
+                                                                            'BuyerName': info['BuyerName'],
+                                                                            'ShippingStatus': info['ShippingStatus']
+                        }
+                if len(tracking_numbers_dict.keys()) > 1:
+                    highest_price = max(tracking_numbers_dict.keys())
+                    newItemsSold[orderID]['ShippingStatus'] = tracking_numbers_dict[highest_price]['ShippingStatus']
+                    newItemsSold[orderID]['BuyerName'] = tracking_numbers_dict[highest_price]['BuyerName']
+                    newItemsSold[orderID]['ShippingLabelCost'] = tracking_numbers_dict[highest_price]['ShippingLabelCost']            
+                elif len(tracking_numbers_dict.keys()) == 1:                    
+                    highest_price = tracking_numbers_dict.keys()[0]
+                    newItemsSold[orderID]['ShippingStatus'] = tracking_numbers_dict[highest_price]['ShippingStatus']
+                    newItemsSold[orderID]['BuyerName'] = tracking_numbers_dict[highest_price]['BuyerName']
+                    newItemsSold[orderID]['ShippingLabelCost'] = tracking_numbers_dict[highest_price]['ShippingLabelCost']            
+                else:
+                    print("Shipping Label Info Not Found") 
                 
+
+        #print(newItemsSold)
         self.ItemsSold.update(newItemsSold)
 
         self.update_json_file()
