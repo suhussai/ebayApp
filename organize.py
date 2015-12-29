@@ -8,7 +8,7 @@ itemsSold = iic.ItemsSold
 for key, value in itemsSold.iteritems():
     # convert long name to short name
     # if available
-    long_name = value['ItemName']
+    long_name = value['ItemName'].replace(" ","")
     if itemsHeld.get(long_name, None) is not None:        
         value['ItemName'] = itemsHeld[long_name].get('short_name', long_name)
         value['cost_of_item'] = itemsHeld[long_name].get('cost_of_item', '0.0')
