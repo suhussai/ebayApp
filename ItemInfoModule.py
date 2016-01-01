@@ -72,14 +72,20 @@ class ItemInfoClass:
                 #if orderID in newItemsSold.keys():
                 for transaction in order['TransactionArray']['Transaction']: 
                     item_name = transaction['Item']['Title']
-                    shipping_details = transaction['ShippingDetails']['ShipmentTrackingDetails']
                     item_tracking_number = []
+                    if transaction['ShippingDetails'].get('ShipmentTrackingDetails', None) is not None:
+                        shipping_details = transaction['ShippingDetails']['ShipmentTrackingDetails']
 
-                    if type(shipping_details) is not  list:
-                        shipping_details = [shipping_details]
+                        if type(shipping_details) is not  list:
+                            shipping_details = [shipping_details]
 
-                    for shipping_detail in shipping_details:
-                        item_tracking_number.append(shipping_detail['ShipmentTrackingNumber'])
+                        for shipping_detail in shipping_details:
+                            item_tracking_number.append(shipping_detail['ShipmentTrackingNumber'])
+
+                    else:
+                        print(transaction)
+                        print(transaction['ShippingDetails'])
+                    
 
                 order_date = order['CreatedTime'] # ex: 2015-12-16T21:13:54.000Z
                 item_total_price = order['Total']['value']
