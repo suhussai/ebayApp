@@ -49,6 +49,7 @@ class ShippingInfoClass:
         and especially shipping label
         cost and item status.
         """
+        count_before = len(self.ShippingInfo)
         fileHandler = open(targetHtmlFile, "r")
         data = fileHandler.read()
         fileHandler.close()
@@ -75,6 +76,8 @@ class ShippingInfoClass:
                                                   shipping_status, 
                                                 "BuyerName" : 
                                                   name}
+        count_after = len(self.ShippingInfo)
+        print("Count before: %d and after: %d, resulting in an increase of %d entries/entry." %(count_before, count_after, count_after-count_before))
         self.update_json_file()
 
             
