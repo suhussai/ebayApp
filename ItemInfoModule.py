@@ -21,6 +21,9 @@ class ItemInfoClass:
     def get_new_items_sold(self):
         HasMorePages = True
         pageNumber = 1
+        orderIDList = []
+        newItemsSold = {}
+
         while HasMorePages:
             api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
             response = api.execute('GetMyeBaySelling', 
@@ -34,8 +37,6 @@ class ItemInfoClass:
                 pageNumber = pageNumber + 1 # increase page for next api request
             else:
                 HasMorePages = False
-            orderIDList = []
-            newItemsSold = {}
             recorded_keys = self.ItemsSold.keys()
             for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
                 orderId = transaction['Transaction']['OrderLineItemID']
@@ -103,6 +104,9 @@ class ItemInfoClass:
                 newItemsSold[orderID]['ItemTrackingNumber'] = item_tracking_number
                 newItemsSold[orderID]['ItemDate'] = order_date #[:order_date.find("T")]
             
+
+            # attach shipping info 
+            # to items
             orderIDs = newItemsSold.keys()
             for orderID in orderIDs:
                 tracking_numbers = newItemsSold[orderID].get('ItemTrackingNumber', [])
