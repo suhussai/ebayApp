@@ -19,25 +19,34 @@ class ItemInfoClass:
         
         
     def get_new_items_sold(self):
-        api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
-        response = api.execute('GetMyeBaySelling', 
-                               {'SoldList': 
-                                {'DurationInDays' : days} 
-                            }
-                           )
-        orderIDList = []
-        newItemsSold = {}
-        recorded_keys = self.ItemsSold.keys()
-        for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
-            orderId = transaction['Transaction']['OrderLineItemID']
-            if orderId not in recorded_keys:
-                orderIDList.append(orderId)
-                newItemsSold[orderId] = self.ItemsSold.get(orderId, {})
-            # else:
-            #     print(str(orderId) + " already recorded in:" +  str(recorded_keys))
+        HasMorePages = True
+        pageNumber = 1
+        while HasMorePages:
+            api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
+            response = api.execute('GetMyeBaySelling', 
+                                   {'SoldList': 
+                                    {'DurationInDays' : days,
+                                     'Pagination': {'EntriesPerPage': 200,
+                                                    'PageNumber': pageNumber}}
+                                }
+            )
+            if pageNumber < int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfPages']):
+                pageNumber = pageNumber + 1 # increase page for next api request
+            else:
+                HasMorePages = False
+            orderIDList = []
+            newItemsSold = {}
+            recorded_keys = self.ItemsSold.keys()
+            for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
+                orderId = transaction['Transaction']['OrderLineItemID']
+                if orderId not in recorded_keys:
+                    orderIDList.append(orderId)
+                    newItemsSold[orderId] = self.ItemsSold.get(orderId, {})
+                    # else:
+                    #     print(str(orderId) + " already recorded in:" +  str(recorded_keys))
             
                 
-        #print("Found " + str(len(orderIDList)) + " new items.")
+        print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(days)))
         # orderIDList consists of the order ID of 
         # the items sold, remove the order item 
         # ids that we already have records for
