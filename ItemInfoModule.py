@@ -30,9 +30,7 @@ class ItemInfoClass:
         """
         HasMorePages = True
         pageNumber = 1
-        orderIDList = []
-        newItemsSold = {}
-
+                
         while HasMorePages:
             response = self.api.execute('GetMyeBaySelling', 
                                    {'SoldList': 
@@ -52,10 +50,7 @@ class ItemInfoClass:
                 if orderId in recorded_keys:
                     self.recordedItems[orderId] = self._ItemsSold[orderId]
                 else:
-                    #orderIDList.append(orderId)
                     self.unrecordedItems[orderId] = {}
-                    # else:
-                    #     print(str(orderId) + " already recorded in:" +  str(recorded_keys))
         print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(days)))
         
     
