@@ -41,12 +41,13 @@ class ItemInfoClass:
             for transaction in response.dict()['SoldList']['OrderTransactionArray']['OrderTransaction']:
                 orderId = transaction['Transaction']['OrderLineItemID']
                 if orderId not in recorded_keys:
-                    orderIDList.append(orderId)
+                    #orderIDList.append(orderId)
                     newItemsSold[orderId] = self.ItemsSold.get(orderId, {})
                     # else:
                     #     print(str(orderId) + " already recorded in:" +  str(recorded_keys))
             
-                
+
+        orderIDList = newItemsSold.keys()
         print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(days)))
         # orderIDList consists of the order ID of 
         # the items sold, remove the order item 
