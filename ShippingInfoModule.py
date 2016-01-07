@@ -7,6 +7,7 @@ class ShippingInfoClass:
     
     def __init__(self, json_fileName, targetHtmlFile):
         self.json_fileName = json_fileName
+        self.targetHtmlFile = targetHtmlFile
         try:
             fileHandler = open(self.json_fileName, 'r')
             self.ShippingInfo = json.load(fileHandler)
@@ -30,9 +31,9 @@ class ShippingInfoClass:
         """
         fileHandler = open(self.json_fileName, 'w') # overwrite file
         self.ShippingInfo["update_file"]["file_size"] = \
-                        str(os.path.getsize(targetHtmlFile))
+                        str(os.path.getsize(self.targetHtmlFile))
         self.ShippingInfo["update_file"]["time_last_modified"] = \
-                        str(os.path.getmtime(targetHtmlFile))
+                        str(os.path.getmtime(self.targetHtmlFile))
 
         self.last_files_time_last_modified = \
                         self.ShippingInfo["update_file"]["time_last_modified"]
@@ -54,7 +55,7 @@ class ShippingInfoClass:
         cost and item status.
         """
         count_before = len(self.ShippingInfo)
-        fileHandler = open(targetHtmlFile, "r")
+        fileHandler = open(self.targetHtmlFile, "r")
         data = fileHandler.read()
         fileHandler.close()
         soup = BeautifulSoup(data, "html.parser")
@@ -114,8 +115,8 @@ class ShippingInfoClass:
         """
         # http://stackoverflow.com/questions/6591931/getting-file-size-in-python
         # http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
-        current_files_time_last_modified = os.path.getmtime(targetHtmlFile)
-        current_files_size = os.path.getsize(targetHtmlFile)
+        current_files_time_last_modified = os.path.getmtime(self.targetHtmlFile)
+        current_files_size = os.path.getsize(self.targetHtmlFile)
         if str(current_files_time_last_modified) == self.last_files_time_last_modified and str(current_files_size) == self.last_files_size:
             #print("Can NOT update")
             return False
