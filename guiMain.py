@@ -47,7 +47,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         users_to_be_deleted = self.listUsers.selectedItems()
         for user in users_to_be_deleted:
-            self.users.pop(user.text(), None)
+            self.users.pop(str(user.text()), None)
         self.update_users_file()        
         self.update_list_user_widget()
 
