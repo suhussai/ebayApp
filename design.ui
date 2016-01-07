@@ -25,17 +25,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="listWidget"/>
+       <widget class="QListWidget" name="listUsers"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="btnSelectAsCurrentUser">
         <property name="text">
          <string>Select As Current User</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_6">
+       <widget class="QPushButton" name="btnDeleteUser">
         <property name="text">
          <string>Delete User</string>
         </property>
@@ -62,7 +62,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_5"/>
+       <widget class="QLineEdit" name="lineUserName"/>
       </item>
       <item>
        <widget class="QLabel" name="label_4">
@@ -72,7 +72,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="lineAppID"/>
       </item>
       <item>
        <widget class="QLabel" name="label_5">
@@ -82,7 +82,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_4"/>
+       <widget class="QLineEdit" name="lineCertID"/>
       </item>
       <item>
        <widget class="QLabel" name="label_6">
@@ -92,7 +92,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_3"/>
+       <widget class="QLineEdit" name="lineDevID"/>
       </item>
       <item>
        <widget class="QLabel" name="label_7">
@@ -102,7 +102,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_2"/>
+       <widget class="QLineEdit" name="lineTokenID"/>
       </item>
       <item>
        <spacer name="horizontalSpacer">
@@ -118,7 +118,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="btnAddUser">
         <property name="text">
          <string>Add User</string>
         </property>
