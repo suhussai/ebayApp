@@ -6,6 +6,7 @@ import json, re
 class ItemInfoClass:
     
     def __init__(self, json_fileName, days, ids):
+        self.days = days
         self.json_fileName = json_fileName
         self._ItemsSold = None
         try:
@@ -16,7 +17,7 @@ class ItemInfoClass:
         except:
             self._ItemsSold = {}
             
-        self.si = ShippingInfoClass('ShippingInfo.json')
+        self.si = ShippingInfoClass('ShippingInfo.json', 'target.html')
         self.recordedItems = {} # holds recorded items
         self.unrecordedItems = {} # holds unrecorded items
         self.requestedItemsSold = {} # holds the items that are 
@@ -39,7 +40,7 @@ class ItemInfoClass:
         while HasMorePages:
             response = self.api.execute('GetMyeBaySelling', 
                                    {'SoldList': 
-                                    {'DurationInDays' : days,
+                                    {'DurationInDays' : self.days,
                                      'Pagination': {'EntriesPerPage': 200,
                                                     'PageNumber': pageNumber}}
                                 }
@@ -56,7 +57,7 @@ class ItemInfoClass:
                     self.recordedItems[orderId] = self._ItemsSold[orderId]
                 else:
                     self.unrecordedItems[orderId] = {}
-        print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(days)))
+        print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(self.days)))
         
     
     def get_new_items_info(self):
@@ -74,7 +75,7 @@ class ItemInfoClass:
             #print("Reading page " + str(pageNumber))
             response = self.api.execute('GetOrders',
                                    {'OrderIDArray': {'OrderID': self.unrecordedItems.keys()},
-                                    'NumberOfDays': days,
+                                    'NumberOfDays': self.days,
                                     'Pagination' : {'EntriesPerPage': 100, 'PageNumber': pageNumber}}
             )
             if 'false' in response.dict()['HasMoreOrders']:
