@@ -6,6 +6,9 @@ import sys
 import design
 import os
 import json
+from ItemInfoModule import ItemInfoClass
+from ShippingInfoModule import ShippingInfoClass
+from ItemsHeldModule import ItemsHeldClass
 
 class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -26,6 +29,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnAddUser.clicked.connect(self.addUser)
         self.btnDeleteUser.clicked.connect(self.deleteUser)
         self.btnSelectAsCurrentUser.clicked.connect(self.selectAsCurrentUser)
+        #print(self.spinBoxDays.value())
 
     def selectAsCurrentUser(self):
         selected_user = self.listUsers.selectedItems()[0]

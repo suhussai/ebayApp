@@ -182,7 +182,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox">
+       <widget class="QSpinBox" name="spinBoxDays">
         <property name="minimum">
          <number>1</number>
         </property>

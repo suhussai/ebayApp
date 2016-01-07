@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Wed Jan  6 18:31:55 2016
+# Created: Wed Jan  6 19:55:21 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -105,11 +105,11 @@ class Ui_MainWindow(object):
         self.label_2.setSizePolicy(sizePolicy)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout_4.addWidget(self.label_2)
-        self.spinBox = QtGui.QSpinBox(self.centralwidget)
-        self.spinBox.setMinimum(1)
-        self.spinBox.setMaximum(60)
-        self.spinBox.setObjectName(_fromUtf8("spinBox"))
-        self.verticalLayout_4.addWidget(self.spinBox)
+        self.spinBoxDays = QtGui.QSpinBox(self.centralwidget)
+        self.spinBoxDays.setMinimum(1)
+        self.spinBoxDays.setMaximum(60)
+        self.spinBoxDays.setObjectName(_fromUtf8("spinBoxDays"))
+        self.verticalLayout_4.addWidget(self.spinBoxDays)
         self.pushButton_4 = QtGui.QPushButton(self.centralwidget)
         self.pushButton_4.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
