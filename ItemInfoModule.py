@@ -5,7 +5,7 @@ import json, re
 
 class ItemInfoClass:
     
-    def __init__(self, json_fileName):
+    def __init__(self, json_fileName, days, ids):
         self.json_fileName = json_fileName
         fileHandler = open(self.json_fileName, 'r')
         self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
