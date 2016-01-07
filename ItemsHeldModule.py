@@ -7,6 +7,17 @@ class ItemsHeldClass:
         fileHandler = open(self.json_fileName, 'r')
         self.ItemsHeld = json.load(fileHandler)
         fileHandler.close()
+
+    def add_entry(self, long_name, short_name, cost_of_item):
+        self.ItemsHeld[long_name.replace(" ","")] = {
+            'long_name': long_name,
+            'short_name': short_name,
+            'cost_of_item': cost_of_item
+        }               
+        
+        
+    def delete_entry(self, long_name):
+        self.ItemsHeld.pop(long_name.replace(" ", ""), None)
         
     def get_short_name(self, long_name):
         value = self.ItemsHeld.get(long_name, None)
