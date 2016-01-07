@@ -1,11 +1,11 @@
 from bs4 import BeautifulSoup
-from constants import shippingInfo, targetHtmlFile
+#from constants import shippingInfo, targetHtmlFile
 import os, re, json
 
 
 class ShippingInfoClass:
     
-    def __init__(self, json_fileName):
+    def __init__(self, json_fileName, targetHtmlFile):
         self.json_fileName = json_fileName
         fileHandler = open(self.json_fileName, 'r')
         self.ShippingInfo = json.load(fileHandler)
