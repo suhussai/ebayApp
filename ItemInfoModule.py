@@ -1,16 +1,21 @@
 from ebaysdk.trading import Connection as Trading
 from ShippingInfoModule import ShippingInfoClass
-from constants import days, ids
+#from constants import days, ids
 import json, re
 
 class ItemInfoClass:
     
     def __init__(self, json_fileName, days, ids):
         self.json_fileName = json_fileName
-        fileHandler = open(self.json_fileName, 'r')
-        self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
-        self._ItemsSold = json.load(fileHandler)
-        fileHandler.close()        
+        self._ItemsSold = None
+        try:
+            fileHandler = open(self.json_fileName, 'r')
+            self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
+            self._ItemsSold = json.load(fileHandler)
+            fileHandler.close()
+        except:
+            self._ItemsSold = {}
+            
         self.si = ShippingInfoClass('ShippingInfo.json')
         self.recordedItems = {} # holds recorded items
         self.unrecordedItems = {} # holds unrecorded items

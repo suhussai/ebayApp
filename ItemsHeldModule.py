@@ -4,9 +4,12 @@ class ItemsHeldClass:
     
     def __init__(self, json_fileName):
         self.json_fileName = json_fileName
-        fileHandler = open(self.json_fileName, 'r')
-        self.ItemsHeld = json.load(fileHandler)
-        fileHandler.close()
+        try:
+            fileHandler = open(self.json_fileName, 'r')
+            self.ItemsHeld = json.load(fileHandler)
+            fileHandler.close()
+        except:
+            self.ItemsHeld = {}
 
     def add_entry(self, long_name, short_name, cost_of_item):
         self.ItemsHeld[long_name.replace(" ","")] = {

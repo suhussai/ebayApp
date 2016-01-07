@@ -7,9 +7,13 @@ class ShippingInfoClass:
     
     def __init__(self, json_fileName, targetHtmlFile):
         self.json_fileName = json_fileName
-        fileHandler = open(self.json_fileName, 'r')
-        self.ShippingInfo = json.load(fileHandler)
-        fileHandler.close()
+        try:
+            fileHandler = open(self.json_fileName, 'r')
+            self.ShippingInfo = json.load(fileHandler)
+            fileHandler.close()
+        except:
+            self.ShippingInfo = {}
+
         self.last_files_time_last_modified = \
                         self.ShippingInfo["update_file"]["time_last_modified"]
         self.last_files_size = \
