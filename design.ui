@@ -155,7 +155,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QTreeWidget" name="treeWidget">
+       <widget class="QTreeWidget" name="treeWidgetItemsSold">
         <column>
          <property name="text">
           <string>ItemName</string>
@@ -192,7 +192,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="btnGetItemsSold">
         <property name="enabled">
          <bool>true</bool>
         </property>

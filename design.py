@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Wed Jan  6 19:55:21 2016
+# Created: Wed Jan  6 21:49:32 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -94,9 +94,9 @@ class Ui_MainWindow(object):
         self.label_3 = QtGui.QLabel(self.centralwidget)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.verticalLayout_4.addWidget(self.label_3)
-        self.treeWidget = QtGui.QTreeWidget(self.centralwidget)
-        self.treeWidget.setObjectName(_fromUtf8("treeWidget"))
-        self.verticalLayout_4.addWidget(self.treeWidget)
+        self.treeWidgetItemsSold = QtGui.QTreeWidget(self.centralwidget)
+        self.treeWidgetItemsSold.setObjectName(_fromUtf8("treeWidgetItemsSold"))
+        self.verticalLayout_4.addWidget(self.treeWidgetItemsSold)
         self.label_2 = QtGui.QLabel(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -110,15 +110,15 @@ class Ui_MainWindow(object):
         self.spinBoxDays.setMaximum(60)
         self.spinBoxDays.setObjectName(_fromUtf8("spinBoxDays"))
         self.verticalLayout_4.addWidget(self.spinBoxDays)
-        self.pushButton_4 = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_4.setEnabled(True)
+        self.btnGetItemsSold = QtGui.QPushButton(self.centralwidget)
+        self.btnGetItemsSold.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_4.sizePolicy().hasHeightForWidth())
-        self.pushButton_4.setSizePolicy(sizePolicy)
-        self.pushButton_4.setObjectName(_fromUtf8("pushButton_4"))
-        self.verticalLayout_4.addWidget(self.pushButton_4)
+        sizePolicy.setHeightForWidth(self.btnGetItemsSold.sizePolicy().hasHeightForWidth())
+        self.btnGetItemsSold.setSizePolicy(sizePolicy)
+        self.btnGetItemsSold.setObjectName(_fromUtf8("btnGetItemsSold"))
+        self.verticalLayout_4.addWidget(self.btnGetItemsSold)
         self.pushButton_2 = QtGui.QPushButton(self.centralwidget)
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
         self.verticalLayout_4.addWidget(self.pushButton_2)
@@ -156,10 +156,10 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "TokenID", None))
         self.btnAddUser.setText(_translate("MainWindow", "Add User", None))
         self.label_3.setText(_translate("MainWindow", "Items Sold", None))
-        self.treeWidget.headerItem().setText(0, _translate("MainWindow", "ItemName", None))
-        self.treeWidget.headerItem().setText(1, _translate("MainWindow", "DateSold", None))
+        self.treeWidgetItemsSold.headerItem().setText(0, _translate("MainWindow", "ItemName", None))
+        self.treeWidgetItemsSold.headerItem().setText(1, _translate("MainWindow", "DateSold", None))
         self.label_2.setText(_translate("MainWindow", "Days", None))
-        self.pushButton_4.setText(_translate("MainWindow", "Get Items Sold", None))
+        self.btnGetItemsSold.setText(_translate("MainWindow", "Get Items Sold", None))
         self.pushButton_2.setText(_translate("MainWindow", "Update Shipping", None))
         self.pushButton_3.setText(_translate("MainWindow", "Update Items Held", None))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))

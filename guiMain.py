@@ -1,6 +1,6 @@
 import time
 import serial
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import QThread, SIGNAL
 import sys
 import design
@@ -14,6 +14,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
         super(eBayApp, self).__init__(parent)
         self.setupUi(self)
+        print(QtGui.QTreeWidgetItem(2))
         self.ser = None
         self.users = None
         self.currentUser = None
@@ -29,7 +30,23 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnAddUser.clicked.connect(self.addUser)
         self.btnDeleteUser.clicked.connect(self.deleteUser)
         self.btnSelectAsCurrentUser.clicked.connect(self.selectAsCurrentUser)
+        self.btnGetItemsSold.clicked.connect(self.getItemsSold)
         #print(self.spinBoxDays.value())
+        
+    def getItemsSold(self):
+        self.days = int(self.spinBoxDays.value())
+        self.ids = [
+            self.currentUserCredentials['AppID'],
+            self.currentUserCredentials['DevID'],
+            self.currentUserCredentials['CertID'],
+            self.currentUserCredentials['TokenID']
+        ]
+        self.get_thread = getItemsSoldThread(self.days, self.ids)
+        self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
+        
+        self.get_thread.start()
+        print("thread started")
+
 
     def selectAsCurrentUser(self):
         selected_user = self.listUsers.selectedItems()[0]
@@ -87,6 +104,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         fileHandler = open(self.users_file, 'w')
         json.dump(self.users, fileHandler, indent=2)
         fileHandler.close()
+
+        
         
         
     def setupSerial(self):
@@ -142,6 +161,37 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         message += "\n"
         fileHandler.write(message)
 
+    def update_items_sold_tree(self, item, itemInfo):
+        print("adding these items")
+        print(item, itemInfo)
+        QtGui.QTreeWidgetItem(self.treeWidgetItemsSold.invisibleRootItem(), [item, itemInfo])
+        #item.setData(0, QtCore.Qt.UserRole, item)
+        #self.treeWidgetItemsSold.setData(0, QtGui.QTreeWidgetItem(item))
+        
+class getItemsSoldThread(QThread):
+    def __init__(self, days, ids):
+        QThread.__init__(self)
+        self.days = days
+        self.ids = ids
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        """
+        main function of the thread
+        - initialize item info module
+        - start main function
+        - destroy class
+        - destroy thread
+        """
+        iic = ItemInfoClass("ItemInfo.json", self.days, self.ids)
+        iic.get_new_items_sold()
+        for item, itemInfo in iic.requestedItemsSold.iteritems():
+            itemName = itemInfo['ItemName']
+            time.sleep(0.5)
+            self.emit(SIGNAL('update_items_sold_tree(QString,QString)'), str(itemName), str(itemInfo))
+            
 class getSerialMessages(QThread):    
     def __init__(self, ser, Values_To_Montior):
         QThread.__init__(self)
