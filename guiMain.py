@@ -31,10 +31,27 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnDeleteUser.clicked.connect(self.deleteUser)
         self.btnSelectAsCurrentUser.clicked.connect(self.selectAsCurrentUser)
         self.btnGetItemsSold.clicked.connect(self.getItemsSold)
-        self.btns = [self.btnGetItemsSold, self.btnSelectAsCurrentUser, self.btnDeleteUser, self.btnAddUser]
+        self.btnUpdateShipping.clicked.connect(self.updateShipping)
+        self.btns = [self.btnUpdateShipping, self.btnGetItemsSold, self.btnSelectAsCurrentUser, self.btnDeleteUser, self.btnAddUser]
         #print(self.spinBoxDays.value())
-        
 
+    def updateShipping(self):
+        """
+        - prepare thread and start 
+        the thread for the
+        update shipping process
+        """
+        self.setAllButtons(self.btnGetItemsSold, False)
+        #days, ids = get_credentials_of_selected_user()
+        self.targetHtmlFile = "target.html"
+        self.get_thread = updateShippingInfoThread(self.targetHtmlFile)
+        self.connect(self.get_thread, SIGNAL('finished_updating_shipping()'), self.finished_getting_items_sold)
+        
+        self.get_thread.start()
+        print("thread started")
+
+        
+        
     def setAllButtons(self, exempted_button, state_of_all_other_buttons):
         """
         used for setting all other buttons in gui
@@ -44,6 +61,17 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         for btn in all_other_btns:
             btn.setEnabled(state_of_all_other_buttons)
 
+
+
+    def finished_updating_shipping(self):
+        """
+        to be run when the getting new 
+        update shipping info process is completed 
+        """
+        self.setAllButtons(self.btnUpdateShipping, True) # turn on all buttons
+        self.get_thread.terminate()
+
+
     def finished_getting_items_sold(self):
         """
         to be run when the getting new 
@@ -52,16 +80,24 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setAllButtons(self.btnGetItemsSold, True) # turn on all buttons
         self.get_thread.terminate()
 
-    def getItemsSold(self):
-        self.setAllButtons(self.btnGetItemsSold, False)
-        self.days = int(self.spinBoxDays.value())
-        self.ids = [
+    def get_credentials_of_selected_user(self):
+        """
+        returns days and ids containing credentials
+        in the requried order
+        """
+        days = int(self.spinBoxDays.value())
+        ids = [
             self.currentUserCredentials['AppID'],
             self.currentUserCredentials['DevID'],
             self.currentUserCredentials['CertID'],
             self.currentUserCredentials['TokenID']
         ]
-        self.get_thread = getItemsSoldThread(self.days, self.ids)
+        return ids, days
+    def getItemsSold(self):
+        self.setAllButtons(self.btnGetItemsSold, False)
+        days, ids = get_credentials_of_selected_user()
+
+        self.get_thread = getItemsSoldThread(days, ids)
         self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
         self.connect(self.get_thread, SIGNAL('finished_getting_items_sold()'), self.finished_getting_items_sold)
         
@@ -188,6 +224,27 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         QtGui.QTreeWidgetItem(self.treeWidgetItemsSold.invisibleRootItem(), [item, itemInfo])
         #item.setData(0, QtCore.Qt.UserRole, item)
         #self.treeWidgetItemsSold.setData(0, QtGui.QTreeWidgetItem(item))
+
+class updateShippingInfoThread(QThread):
+    def __init__(self,targetHtmlFile):
+        QThread.__init__(self)
+        self.targetHtmlFile = targetHtmlFile
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        """
+        main function of the thread
+        - initialize shipping info module
+        - start main function
+        - destroy class
+        - destroy thread
+        """
+        sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile)
+        sic.update_ShippingInfo_and_file()
+        self.emit(SIGNAL('finished_updating_shipping()'))
+
         
 class getItemsSoldThread(QThread):
     def __init__(self, days, ids):
@@ -236,6 +293,7 @@ class getSerialMessages(QThread):
                     self.emit(SIGNAL('updateValue(QString,QString)'), ID, value)
                 except:
                     pass
+
 
     
 
