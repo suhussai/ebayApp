@@ -13,7 +13,12 @@ class ShippingInfoClass:
             self.ShippingInfo = json.load(fileHandler)
             fileHandler.close()
         except:
-            self.ShippingInfo = {}
+            self.ShippingInfo = {
+                "update_file": {
+                    "time_last_modified" : 0,
+                    "file_size" : 0
+                }
+            }
 
         self.last_files_time_last_modified = \
                         self.ShippingInfo["update_file"]["time_last_modified"]
