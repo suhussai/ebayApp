@@ -31,9 +31,29 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnDeleteUser.clicked.connect(self.deleteUser)
         self.btnSelectAsCurrentUser.clicked.connect(self.selectAsCurrentUser)
         self.btnGetItemsSold.clicked.connect(self.getItemsSold)
+        self.btns = [self.btnGetItemsSold, self.btnSelectAsCurrentUser, self.btnDeleteUser, self.btnAddUser]
         #print(self.spinBoxDays.value())
         
+
+    def setAllButtons(self, exempted_button, state_of_all_other_buttons):
+        """
+        used for setting all other buttons in gui
+        to be True or False except a pre specified btn
+        """
+        all_other_btns = [btn for btn in self.btns if btn is not exempted_button]
+        for btn in all_other_btns:
+            btn.setEnabled(state_of_all_other_buttons)
+
+    def finished_getting_items_sold(self):
+        """
+        to be run when the getting new 
+        items sold process is completed 
+        """
+        self.setAllButtons(self.btnGetItemsSold, True) # turn on all buttons
+        
+
     def getItemsSold(self):
+        self.setAllButtons(self.btnGetItemsSold, False)
         self.days = int(self.spinBoxDays.value())
         self.ids = [
             self.currentUserCredentials['AppID'],
@@ -43,6 +63,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         ]
         self.get_thread = getItemsSoldThread(self.days, self.ids)
         self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
+        self.connect(self.get_thread, SIGNAL('finished_getting_items_sold()'), self.finished_getting_items_sold)
         
         self.get_thread.start()
         print("thread started")
@@ -191,6 +212,8 @@ class getItemsSoldThread(QThread):
             itemName = itemInfo['ItemName']
             time.sleep(0.5)
             self.emit(SIGNAL('update_items_sold_tree(QString,QString)'), str(itemName), str(itemInfo))
+
+        self.emit(SIGNAL('finished_getting_items_sold()'))
             
 class getSerialMessages(QThread):    
     def __init__(self, ser, Values_To_Montior):
