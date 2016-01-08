@@ -93,9 +93,10 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
             self.currentUserCredentials['TokenID']
         ]
         return ids, days
+
     def getItemsSold(self):
         self.setAllButtons(self.btnGetItemsSold, False)
-        ids, days = get_credentials_of_selected_user()
+        ids, days = self.get_credentials_of_selected_user()
 
         self.get_thread = getItemsSoldThread(days, ids)
         self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
