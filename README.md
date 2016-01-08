@@ -8,4 +8,5 @@ Jan. 7 2016
 
 
 # Dependencies
-Uses eBaySDK from timotheus/ebaysdk-python
+- Uses eBaySDK from timotheus/ebaysdk-python
+- Used https://rtyley.github.io/bfg-repo-cleaner/ to remove sensitive test user info
