@@ -50,7 +50,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         items sold process is completed 
         """
         self.setAllButtons(self.btnGetItemsSold, True) # turn on all buttons
-        
+        self.get_thread.terminate()
 
     def getItemsSold(self):
         self.setAllButtons(self.btnGetItemsSold, False)
