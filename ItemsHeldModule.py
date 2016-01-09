@@ -17,6 +17,7 @@ class ItemsHeldClass:
             'short_name': short_name,
             'cost_of_item': cost_of_item
         }
+        self.update_json_file()
 
 
     def delete_entry(self, long_name):
