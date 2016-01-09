@@ -9,4 +9,5 @@ Jan. 7 2016
 
 # Dependencies
 - Uses eBaySDK from timotheus/ebaysdk-python
+- Module BeautifulSoup4 
 - Used https://rtyley.github.io/bfg-repo-cleaner/ to remove sensitive test user info
