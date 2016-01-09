@@ -32,9 +32,18 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnSelectAsCurrentUser.clicked.connect(self.selectAsCurrentUser)
         self.btnGetItemsSold.clicked.connect(self.getItemsSold)
         self.btnUpdateShipping.clicked.connect(self.updateShipping)
+        self.btnAddNewItem.clicked.connect(self.addNewItem)
         self.btns = [self.btnUpdateShipping, self.btnGetItemsSold, self.btnSelectAsCurrentUser, self.btnDeleteUser, self.btnAddUser]
         #print(self.spinBoxDays.value())
 
+    def addNewItem(self):
+        """
+        add new item with:
+        - long name from lineLongName.text()
+        - short name from lineShortName.text()
+        - cost of item from spinCostOfItem.value()
+        """
+        pass
     def updateShipping(self):
         """
         - prepare thread and start

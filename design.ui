@@ -222,7 +222,7 @@
       <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
-         <string>PushButton</string>
+         <string>Export to Spreadsheet</string>
         </property>
        </widget>
       </item>
@@ -286,7 +286,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_3"/>
+       <widget class="QLineEdit" name="lineLongName"/>
       </item>
       <item>
        <widget class="QLabel" name="label_10">
@@ -306,12 +306,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="btnAddNewItem">
         <property name="text">
-         <string>Add New Items</string>
+         <string>Add New Item</string>
         </property>
        </widget>
       </item>
