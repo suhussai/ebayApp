@@ -224,27 +224,6 @@ class getItemsSoldThread(QThread):
 
         self.emit(SIGNAL('finished_getting_items_sold()'))
 
-class getSerialMessages(QThread):
-    def __init__(self, ser, Values_To_Montior):
-        QThread.__init__(self)
-        self.Values_To_Montior = Values_To_Montior
-        self.ser = ser
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        while True:
-            line = self.ser.readline() # read line
-            print("from thread...")
-            print("line is " + line)
-            if len(line) > 0:
-                try:
-                    (ID, value) = line.split() # get id and value
-                    self.emit(SIGNAL('updateValue(QString,QString)'), ID, value)
-                except:
-                    pass
-
 def main():
     app = QtGui.QApplication(sys.argv)
     form = eBayApp()
@@ -253,17 +232,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-#### Arduino Code
-#### http://electronics.stackexchange.com/questions/87868/data-lost-writing-on-arduino-serial-port-overflow
-# void setup(){
-#   Serial.begin(9600);
-# }
-# void loop(){
-#   Serial.println("FCTEMP2 20");
-#   Serial.flush();
-#   delay(1000);
-# }
-
-
