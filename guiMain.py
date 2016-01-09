@@ -37,7 +37,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def updateShipping(self):
         """
-        - prepare thread and start 
+        - prepare thread and start
         the thread for the
         update shipping process
         """
@@ -46,12 +46,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.targetHtmlFile = "target.html"
         self.get_thread = updateShippingInfoThread(self.targetHtmlFile)
         self.connect(self.get_thread, SIGNAL('finished_updating_shipping()'), self.finished_getting_items_sold)
-        
         self.get_thread.start()
         print("thread started")
 
-        
-        
     def setAllButtons(self, exempted_button, state_of_all_other_buttons):
         """
         used for setting all other buttons in gui
@@ -65,8 +62,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def finished_updating_shipping(self):
         """
-        to be run when the getting new 
-        update shipping info process is completed 
+        to be run when the getting new
+        update shipping info process is completed
         """
         self.setAllButtons(self.btnUpdateShipping, True) # turn on all buttons
         self.get_thread.terminate()
@@ -74,8 +71,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def finished_getting_items_sold(self):
         """
-        to be run when the getting new 
-        items sold process is completed 
+        to be run when the getting new
+        items sold process is completed
         """
         self.setAllButtons(self.btnGetItemsSold, True) # turn on all buttons
         self.get_thread.terminate()
@@ -101,7 +98,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.get_thread = getItemsSoldThread(days, ids)
         self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
         self.connect(self.get_thread, SIGNAL('finished_getting_items_sold()'), self.finished_getting_items_sold)
-        
+
         self.get_thread.start()
         print("thread started")
 
@@ -121,13 +118,13 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def deleteUser(self):
         """
-        delete selected user and update list and 
+        delete selected user and update list and
         user records
         """
         users_to_be_deleted = self.listUsers.selectedItems()
         for user in users_to_be_deleted:
             self.users.pop(str(user.text()), None)
-        self.update_users_file()        
+        self.update_users_file()
         self.update_list_user_widget()
 
     def addUser(self):
@@ -155,17 +152,11 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.update_users_file()
         self.update_list_user_widget()
 
-        
-        
-        
     def update_users_file(self):
         fileHandler = open(self.users_file, 'w')
         json.dump(self.users, fileHandler, indent=2)
         fileHandler.close()
 
-        
-        
-        
     def setupSerial(self):
         # https://pyserial.readthedocs.org/en/latest/shortintro.html
         self.ser = serial.Serial()
@@ -188,8 +179,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def updateValue(self, ID, value):
         print("Updating value")
         print("ID " + str(ID) + " Value " + str(value))
-        if (self.Values_To_Montior.get(str(ID), None) is not None): 
-            self.Values_To_Montior[str(ID)] = value 
+        if (self.Values_To_Montior.get(str(ID), None) is not None):
+            self.Values_To_Montior[str(ID)] = value
             self.displayValues()
 
     def displayValues(self):
@@ -215,7 +206,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         message = str(time.asctime(time.localtime(time.time()))) + " "
         for ID, value in Values_To_Montior.iteritems():
             message +=  "%d, " % (int(value))
-            
+
         message += "\n"
         fileHandler.write(message)
 
@@ -246,7 +237,6 @@ class updateShippingInfoThread(QThread):
         sic.update_ShippingInfo_and_file()
         self.emit(SIGNAL('finished_updating_shipping()'))
 
-        
 class getItemsSoldThread(QThread):
     def __init__(self, days, ids):
         QThread.__init__(self)
@@ -272,17 +262,16 @@ class getItemsSoldThread(QThread):
             self.emit(SIGNAL('update_items_sold_tree(QString,QString)'), str(itemName), str(itemInfo))
 
         self.emit(SIGNAL('finished_getting_items_sold()'))
-            
-class getSerialMessages(QThread):    
+
+class getSerialMessages(QThread):
     def __init__(self, ser, Values_To_Montior):
         QThread.__init__(self)
         self.Values_To_Montior = Values_To_Montior
         self.ser = ser
 
     def __del__(self):
-        self.wait()            
-        
-        
+        self.wait()
+
     def run(self):
         while True:
             line = self.ser.readline() # read line
@@ -295,10 +284,6 @@ class getSerialMessages(QThread):
                 except:
                     pass
 
-
-    
-
-
 def main():
     app = QtGui.QApplication(sys.argv)
     form = eBayApp()
@@ -308,14 +293,14 @@ def main():
 if __name__ == '__main__':
     main()
 
-    
+
 #### Arduino Code
 #### http://electronics.stackexchange.com/questions/87868/data-lost-writing-on-arduino-serial-port-overflow
 # void setup(){
 #   Serial.begin(9600);
 # }
 # void loop(){
-#   Serial.println("FCTEMP2 20");   
+#   Serial.println("FCTEMP2 20");
 #   Serial.flush();
 #   delay(1000);
 # }
