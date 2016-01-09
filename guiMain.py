@@ -14,7 +14,6 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
         super(eBayApp, self).__init__(parent)
         self.setupUi(self)
-        print(QtGui.QTreeWidgetItem(2))
         self.ser = None
         self.users = None
         self.currentUser = None
@@ -39,11 +38,17 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def addNewItem(self):
         """
         add new item with:
-        - long name from lineLongName.text()
-        - short name from lineShortName.text()
-        - cost of item from spinCostOfItem.value()
+        - long name from self.lineLongName.text()
+        - short name from self.lineShortName.text()
+        - cost of item from self.spinCostOfItem.value()
+        Note: quick process, separate thread not required
         """
-        pass
+        ihc = ItemsHeldClass("ItemsHeld.json")
+        long_name = str(self.lineLongName.text())
+        short_name = str(self.lineShortName.text())
+        cost_of_item = str(self.doubleSpinCostOfItem.value())
+        ihc.add_entry(long_name, short_name, cost_of_item)
+
     def updateShipping(self):
         """
         - prepare thread and start
@@ -165,59 +170,6 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         fileHandler = open(self.users_file, 'w')
         json.dump(self.users, fileHandler, indent=2)
         fileHandler.close()
-
-    def setupSerial(self):
-        # https://pyserial.readthedocs.org/en/latest/shortintro.html
-        self.ser = serial.Serial()
-        self.ser.baudrate = int(self.baudRate.text())
-        self.ser.port = str(self.portName.text())
-        self.ser.open()
-
-        self.get_thread = getSerialMessages(self.ser, self.Values_To_Montior)
-        self.connect(self.get_thread, SIGNAL('updateValue(QString, QString)'), self.updateValue)
-
-        self.get_thread.start()
-        print("thread started")
-        #self.btnShutdown.clicked.connect(self.get_thread.terminate)
-
-    def teardownSerial(self):
-        self.get_thread.terminate()
-        self.ser.close()
-        print("thread terminated")
-
-    def updateValue(self, ID, value):
-        print("Updating value")
-        print("ID " + str(ID) + " Value " + str(value))
-        if (self.Values_To_Montior.get(str(ID), None) is not None):
-            self.Values_To_Montior[str(ID)] = value
-            self.displayValues()
-
-    def displayValues(self):
-        print("displaying!!!")
-        self.fieldDisplay.clear()
-        for ID, value  in self.Values_To_Montior.iteritems():
-            formatted_string = str(ID) + " : " + str(value)
-            print("adding item " + formatted_string)
-            self.fieldDisplay.addItem(formatted_string)
-
-    def setupFileHandler(fileName):
-        #http://www.tutorialspoint.com/python/python_files_io.htm
-        fileHandler = open(fileName, "w+")
-        # FCTEMP2:-1, TANKPRES:-1, FCTEMP1:-1, AMTEMP2:-1, AMTEMP1:-1, ERROR:-1, FCPRES:-1, FCVOLT:-1, FCCURR:-1, CAPCURR:-1
-        fileHandler.write("Time, FCTEMP2, TANKPRES, FCTEMP1, AMTEMP2, AMTEMP1, ERROR, FCPRES, FCVOLT, FCCURR, CAPCURR\n")
-        return fileHandler
-
-    def teardownFileHandler(fileHandler):
-        fileHandler.close()
-
-    def writeToLog(fileHandler, Values_To_Montior):
-        #http://www.tutorialspoint.com/python/python_date_time.htm
-        message = str(time.asctime(time.localtime(time.time()))) + " "
-        for ID, value in Values_To_Montior.iteritems():
-            message +=  "%d, " % (int(value))
-
-        message += "\n"
-        fileHandler.write(message)
 
     def update_items_sold_tree(self, item, itemInfo):
         print("adding these items")

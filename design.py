@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Sat Jan  9 10:45:31 2016
+# Created: Sat Jan  9 16:16:46 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -136,24 +136,24 @@ class Ui_MainWindow(object):
         self.label_11 = QtGui.QLabel(self.centralwidget)
         self.label_11.setObjectName(_fromUtf8("label_11"))
         self.verticalLayout_4.addWidget(self.label_11)
-        self.lineEdit_3 = QtGui.QLineEdit(self.centralwidget)
-        self.lineEdit_3.setObjectName(_fromUtf8("lineEdit_3"))
-        self.verticalLayout_4.addWidget(self.lineEdit_3)
+        self.lineLongName = QtGui.QLineEdit(self.centralwidget)
+        self.lineLongName.setObjectName(_fromUtf8("lineLongName"))
+        self.verticalLayout_4.addWidget(self.lineLongName)
         self.label_10 = QtGui.QLabel(self.centralwidget)
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.verticalLayout_4.addWidget(self.label_10)
-        self.lineEdit_2 = QtGui.QLineEdit(self.centralwidget)
-        self.lineEdit_2.setObjectName(_fromUtf8("lineEdit_2"))
-        self.verticalLayout_4.addWidget(self.lineEdit_2)
+        self.lineShortName = QtGui.QLineEdit(self.centralwidget)
+        self.lineShortName.setObjectName(_fromUtf8("lineShortName"))
+        self.verticalLayout_4.addWidget(self.lineShortName)
         self.label_9 = QtGui.QLabel(self.centralwidget)
         self.label_9.setObjectName(_fromUtf8("label_9"))
         self.verticalLayout_4.addWidget(self.label_9)
-        self.lineEdit = QtGui.QLineEdit(self.centralwidget)
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.verticalLayout_4.addWidget(self.lineEdit)
-        self.pushButton_3 = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
-        self.verticalLayout_4.addWidget(self.pushButton_3)
+        self.doubleSpinCostOfItem = QtGui.QDoubleSpinBox(self.centralwidget)
+        self.doubleSpinCostOfItem.setObjectName(_fromUtf8("doubleSpinCostOfItem"))
+        self.verticalLayout_4.addWidget(self.doubleSpinCostOfItem)
+        self.btnAddNewItem = QtGui.QPushButton(self.centralwidget)
+        self.btnAddNewItem.setObjectName(_fromUtf8("btnAddNewItem"))
+        self.verticalLayout_4.addWidget(self.btnAddNewItem)
         self.horizontalLayout.addLayout(self.verticalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -187,7 +187,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "Days", None))
         self.btnGetItemsSold.setText(_translate("MainWindow", "Get Items Sold", None))
         self.btnUpdateShipping.setText(_translate("MainWindow", "Update Shipping", None))
-        self.pushButton.setText(_translate("MainWindow", "PushButton", None))
+        self.pushButton.setText(_translate("MainWindow", "Export to Spreadsheet", None))
         self.label_3.setText(_translate("MainWindow", "Items Held", None))
         self.treeWidgetItemsSold.headerItem().setText(0, _translate("MainWindow", "Long Name", None))
         self.treeWidgetItemsSold.headerItem().setText(1, _translate("MainWindow", "Short Name", None))
@@ -195,7 +195,7 @@ class Ui_MainWindow(object):
         self.label_11.setText(_translate("MainWindow", "Long Name", None))
         self.label_10.setText(_translate("MainWindow", "Short Name", None))
         self.label_9.setText(_translate("MainWindow", "Cost of Item", None))
-        self.pushButton_3.setText(_translate("MainWindow", "Add New Items", None))
+        self.btnAddNewItem.setText(_translate("MainWindow", "Add New Item", None))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))
         self.toolBar_2.setWindowTitle(_translate("MainWindow", "toolBar_2", None))
 

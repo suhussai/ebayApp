@@ -296,7 +296,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_2"/>
+       <widget class="QLineEdit" name="lineShortName"/>
       </item>
       <item>
        <widget class="QLabel" name="label_9">
@@ -306,7 +306,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+       <widget class="QDoubleSpinBox" name="doubleSpinCostOfItem"/>
       </item>
       <item>
        <widget class="QPushButton" name="btnAddNewItem">
