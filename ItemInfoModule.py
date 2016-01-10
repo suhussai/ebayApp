@@ -10,7 +10,8 @@ class ItemInfoClass:
         self.days = days
         self.json_fileName = json_fileName
         self._ItemsSold = None
-        self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2], token=ids[3])
+        self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2],
+                           token=ids[3], config_file=None)
         try:
             fileHandler = open(self.json_fileName, 'r')
             self._ItemsSold = json.load(fileHandler)
