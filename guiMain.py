@@ -18,6 +18,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.users = None
         self.currentUser = None
         self.currentUserCredentials = None
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
+        self.update_items_held_tree()
         self.users_file = "users.json"
         try: # in case it doesnt exist
             fileHandler = open(self.users_file, 'r')
@@ -32,7 +34,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnGetItemsSold.clicked.connect(self.getItemsSold)
         self.btnUpdateShipping.clicked.connect(self.updateShipping)
         self.btnAddNewItem.clicked.connect(self.addNewItem)
-        self.btns = [self.btnUpdateShipping, self.btnGetItemsSold, self.btnSelectAsCurrentUser, self.btnDeleteUser, self.btnAddUser]
+        self.btns = [self.btnUpdateShipping, self.btnGetItemsSold,
+                     self.btnSelectAsCurrentUser, self.btnDeleteUser,
+                     self.btnAddUser]
         #print(self.spinBoxDays.value())
 
     def addNewItem(self):
@@ -43,11 +47,11 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         - cost of item from self.spinCostOfItem.value()
         Note: quick process, separate thread not required
         """
-        ihc = ItemsHeldClass("ItemsHeld.json")
         long_name = str(self.lineLongName.text())
         short_name = str(self.lineShortName.text())
         cost_of_item = str(self.doubleSpinCostOfItem.value())
-        ihc.add_entry(long_name, short_name, cost_of_item)
+        self.itemsHeldClassHandler.add_entry(long_name, short_name, cost_of_item)
+        self.update_items_held_tree()
 
     def updateShipping(self):
         """
@@ -59,7 +63,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         #days, ids = get_credentials_of_selected_user()
         self.targetHtmlFile = "target.html"
         self.get_thread = updateShippingInfoThread(self.targetHtmlFile)
-        self.connect(self.get_thread, SIGNAL('finished_updating_shipping()'), self.finished_getting_items_sold)
+        self.connect(self.get_thread,
+                     SIGNAL('finished_updating_shipping(PyQt_PyObject)'),
+                     self.finished_getting_items_sold)
         self.get_thread.start()
         print("thread started")
 
@@ -83,7 +89,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.get_thread.terminate()
 
 
-    def finished_getting_items_sold(self):
+    def finished_getting_items_sold(self, requestedItemsSold):
         """
         to be run when the getting new
         items sold process is completed
@@ -110,8 +116,10 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         ids, days = self.get_credentials_of_selected_user()
 
         self.get_thread = getItemsSoldThread(days, ids)
-        self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
-        self.connect(self.get_thread, SIGNAL('finished_getting_items_sold()'), self.finished_getting_items_sold)
+        #self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
+        self.connect(self.get_thread,
+                     SIGNAL('finished_getting_items_sold(PyQt_PyObject)'),
+                     self.finished_getting_items_sold)
 
         self.get_thread.start()
         print("thread started")
@@ -171,12 +179,18 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         json.dump(self.users, fileHandler, indent=2)
         fileHandler.close()
 
-    def update_items_sold_tree(self, item, itemInfo):
-        print("adding these items")
-        print(item, itemInfo)
-        QtGui.QTreeWidgetItem(self.treeWidgetItemsSold.invisibleRootItem(), [item, itemInfo])
-        #item.setData(0, QtCore.Qt.UserRole, item)
-        #self.treeWidgetItemsSold.setData(0, QtGui.QTreeWidgetItem(item))
+    def update_items_held_tree(self):
+        item_records = self.itemsHeldClassHandler.ItemsHeld.values()
+        # item_records is a list of dicts containing
+        # long_name, short_name and cost_of_item
+        for items_record in item_records:
+            formatted_records = [
+                items_record['long_name'],
+                items_record['short_name'],
+                items_record['cost_of_item']
+            ]
+            QtGui.QTreeWidgetItem(self.treeItemsHeld.invisibleRootItem(),
+                                  formatted_records)
 
 class updateShippingInfoThread(QThread):
     def __init__(self,targetHtmlFile):
@@ -217,13 +231,8 @@ class getItemsSoldThread(QThread):
         """
         iic = ItemInfoClass("ItemInfo.json", self.days, self.ids)
         iic.get_new_items_sold()
-        for item, itemInfo in iic.requestedItemsSold.iteritems():
-            itemName = itemInfo['ItemName']
-            time.sleep(0.5)
-            self.emit(SIGNAL('update_items_sold_tree(QString,QString)'), str(itemName), str(itemInfo))
-
-        self.emit(SIGNAL('finished_getting_items_sold()'))
-
+        self.emit(SIGNAL('finished_getting_items_sold(PyQt_PyObject)'),
+                  iic.requestedItemsSold)
 def main():
     app = QtGui.QApplication(sys.argv)
     form = eBayApp()

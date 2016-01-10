@@ -260,7 +260,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QTreeWidget" name="treeWidgetItemsSold">
+       <widget class="QTreeWidget" name="treeItemsHeld">
         <column>
          <property name="text">
           <string>Long Name</string>

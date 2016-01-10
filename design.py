@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Sat Jan  9 16:16:46 2016
+# Created: Sat Jan  9 17:21:42 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -130,9 +130,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.addWidget(self.label_3)
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.verticalLayout_4.addItem(spacerItem6)
-        self.treeWidgetItemsSold = QtGui.QTreeWidget(self.centralwidget)
-        self.treeWidgetItemsSold.setObjectName(_fromUtf8("treeWidgetItemsSold"))
-        self.verticalLayout_4.addWidget(self.treeWidgetItemsSold)
+        self.treeItemsHeld = QtGui.QTreeWidget(self.centralwidget)
+        self.treeItemsHeld.setObjectName(_fromUtf8("treeItemsHeld"))
+        self.verticalLayout_4.addWidget(self.treeItemsHeld)
         self.label_11 = QtGui.QLabel(self.centralwidget)
         self.label_11.setObjectName(_fromUtf8("label_11"))
         self.verticalLayout_4.addWidget(self.label_11)
@@ -189,9 +189,9 @@ class Ui_MainWindow(object):
         self.btnUpdateShipping.setText(_translate("MainWindow", "Update Shipping", None))
         self.pushButton.setText(_translate("MainWindow", "Export to Spreadsheet", None))
         self.label_3.setText(_translate("MainWindow", "Items Held", None))
-        self.treeWidgetItemsSold.headerItem().setText(0, _translate("MainWindow", "Long Name", None))
-        self.treeWidgetItemsSold.headerItem().setText(1, _translate("MainWindow", "Short Name", None))
-        self.treeWidgetItemsSold.headerItem().setText(2, _translate("MainWindow", "Cost of Item", None))
+        self.treeItemsHeld.headerItem().setText(0, _translate("MainWindow", "Long Name", None))
+        self.treeItemsHeld.headerItem().setText(1, _translate("MainWindow", "Short Name", None))
+        self.treeItemsHeld.headerItem().setText(2, _translate("MainWindow", "Cost of Item", None))
         self.label_11.setText(_translate("MainWindow", "Long Name", None))
         self.label_10.setText(_translate("MainWindow", "Short Name", None))
         self.label_9.setText(_translate("MainWindow", "Cost of Item", None))
