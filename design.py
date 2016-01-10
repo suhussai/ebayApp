@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Sat Jan  9 17:41:47 2016
+# Created: Sat Jan  9 17:58:36 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -120,9 +120,9 @@ class Ui_MainWindow(object):
         self.btnUpdateShipping = QtGui.QPushButton(self.centralwidget)
         self.btnUpdateShipping.setObjectName(_fromUtf8("btnUpdateShipping"))
         self.verticalLayout_4.addWidget(self.btnUpdateShipping)
-        self.pushButton = QtGui.QPushButton(self.centralwidget)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.verticalLayout_4.addWidget(self.pushButton)
+        self.btnExportToSpreadsheet = QtGui.QPushButton(self.centralwidget)
+        self.btnExportToSpreadsheet.setObjectName(_fromUtf8("btnExportToSpreadsheet"))
+        self.verticalLayout_4.addWidget(self.btnExportToSpreadsheet)
         spacerItem5 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.verticalLayout_4.addItem(spacerItem5)
         self.label_3 = QtGui.QLabel(self.centralwidget)
@@ -190,7 +190,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "Days", None))
         self.btnGetItemsSold.setText(_translate("MainWindow", "Get Items Sold", None))
         self.btnUpdateShipping.setText(_translate("MainWindow", "Update Shipping", None))
-        self.pushButton.setText(_translate("MainWindow", "Export to Spreadsheet", None))
+        self.btnExportToSpreadsheet.setText(_translate("MainWindow", "Export to Spreadsheet", None))
         self.label_3.setText(_translate("MainWindow", "Items Held", None))
         self.treeItemsHeld.headerItem().setText(0, _translate("MainWindow", "Long Name", None))
         self.treeItemsHeld.headerItem().setText(1, _translate("MainWindow", "Short Name", None))
