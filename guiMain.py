@@ -180,7 +180,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         fileHandler.close()
 
     def update_items_held_tree(self):
+        self.treeItemsHeld.clear()
         item_records = self.itemsHeldClassHandler.ItemsHeld.values()
+        item_records.sort()
         # item_records is a list of dicts containing
         # long_name, short_name and cost_of_item
         for items_record in item_records:
