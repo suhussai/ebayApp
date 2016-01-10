@@ -1,10 +1,11 @@
 from ebaysdk.trading import Connection as Trading
 from ShippingInfoModule import ShippingInfoClass
+from ItemsHeldModule import ItemsHeldClass
 #from constants import days, ids
 import json, re
 
 class ItemInfoClass:
-    
+
     def __init__(self, json_fileName, days, ids):
         self.days = days
         self.json_fileName = json_fileName
@@ -16,11 +17,11 @@ class ItemInfoClass:
             fileHandler.close()
         except:
             self._ItemsSold = {}
-            
+
         self.si = ShippingInfoClass('ShippingInfo.json', 'target.html')
         self.recordedItems = {} # holds recorded items
         self.unrecordedItems = {} # holds unrecorded items
-        self.requestedItemsSold = {} # holds the items that are 
+        self.requestedItemsSold = {} # holds the items that are
                                      # found in the last 'days'
     def update_json_file(self):
         fileHandler = open(self.json_fileName, 'w')
@@ -31,15 +32,15 @@ class ItemInfoClass:
     def get_new_items_orderID(self):
         """
         - gets the items sold in the last 'days'
-        - populates dictionaries self.recordedItems & self.unrecordedItems 
+        - populates dictionaries self.recordedItems & self.unrecordedItems
         accordingly
         """
         HasMorePages = True
         pageNumber = 1
-                
+
         while HasMorePages:
-            response = self.api.execute('GetMyeBaySelling', 
-                                   {'SoldList': 
+            response = self.api.execute('GetMyeBaySelling',
+                                   {'SoldList':
                                     {'DurationInDays' : self.days,
                                      'Pagination': {'EntriesPerPage': 200,
                                                     'PageNumber': pageNumber}}
@@ -58,11 +59,11 @@ class ItemInfoClass:
                 else:
                     self.unrecordedItems[orderId] = {}
         print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(self.days)))
-        
-    
+
+
     def get_new_items_info(self):
         """
-        - looks through ebay orders for 
+        - looks through ebay orders for
         all items for which we have no
         information on record
         - populates unrecorded item infos
@@ -88,9 +89,9 @@ class ItemInfoClass:
             for order in response.dict()['OrderArray']['Order']:
                 # get basic information for each
                 # of the items sold
-                orderID = order['OrderID'] 
+                orderID = order['OrderID']
                 #if orderID in self.unrecordedItems.keys():
-                for transaction in order['TransactionArray']['Transaction']: 
+                for transaction in order['TransactionArray']['Transaction']:
                     item_name = transaction['Item']['Title']
                     item_tracking_number = []
                     if transaction['ShippingDetails'].get('ShipmentTrackingDetails', None) is not None:
@@ -105,7 +106,7 @@ class ItemInfoClass:
                     else:
                         print(transaction)
                         print(transaction['ShippingDetails'])
-                    
+
                 # add information to the dictionary
                 order_date = order['CreatedTime'] # ex: 2015-12-16T21:13:54.000Z
                 item_total_price = order['Total']['value']
@@ -113,9 +114,9 @@ class ItemInfoClass:
                 self.unrecordedItems[orderID]['ItemPrice'] = item_total_price
                 self.unrecordedItems[orderID]['ItemTrackingNumber'] = item_tracking_number
                 self.unrecordedItems[orderID]['ItemDate'] = order_date #[:order_date.find("T")]
-            
 
-            # attach shipping info 
+
+            # attach shipping info
             # to items
             orderIDs = self.unrecordedItems.keys()
             for orderID in orderIDs:
@@ -125,58 +126,102 @@ class ItemInfoClass:
                 for tracking_number in tracking_numbers:
                     info = self.si.getLabelInfo(tracking_number)
                     if info is not None and "Void" not in info['ShippingStatus']:
-                        tracking_numbers_dict[float(info['ShippingLabelCost'][1:])] = {'ShippingLabelCost': info['ShippingLabelCost'],
-                                                                            'BuyerName': info['BuyerName'],
-                                                                            'ShippingStatus': info['ShippingStatus']
+                        tracking_numbers_dict[float(info['ShippingLabelCost'][1:])]= {
+                            'ShippingLabelCost': info['ShippingLabelCost'],
+                            'BuyerName': info['BuyerName'],
+                            'ShippingStatus': info['ShippingStatus']
                         }
                 if len(tracking_numbers_dict.keys()) > 1:
                     highest_price = max(tracking_numbers_dict.keys())
                     self.unrecordedItems[orderID]['ShippingStatus'] = tracking_numbers_dict[highest_price]['ShippingStatus']
                     self.unrecordedItems[orderID]['BuyerName'] = tracking_numbers_dict[highest_price]['BuyerName']
-                    self.unrecordedItems[orderID]['ShippingLabelCost'] = tracking_numbers_dict[highest_price]['ShippingLabelCost']            
-                elif len(tracking_numbers_dict.keys()) == 1:                    
+                    self.unrecordedItems[orderID]['ShippingLabelCost'] = tracking_numbers_dict[highest_price]['ShippingLabelCost']
+                elif len(tracking_numbers_dict.keys()) == 1:
                     highest_price = tracking_numbers_dict.keys()[0]
                     self.unrecordedItems[orderID]['ShippingStatus'] = tracking_numbers_dict[highest_price]['ShippingStatus']
                     self.unrecordedItems[orderID]['BuyerName'] = tracking_numbers_dict[highest_price]['BuyerName']
-                    self.unrecordedItems[orderID]['ShippingLabelCost'] = tracking_numbers_dict[highest_price]['ShippingLabelCost']            
+                    self.unrecordedItems[orderID]['ShippingLabelCost'] = tracking_numbers_dict[highest_price]['ShippingLabelCost']
                 else:
-                    print("Shipping Label Info Not Found") 
+                    print("Shipping Label Info Not Found")
 
 
     def get_new_items_sold(self):
-        
         self.get_new_items_orderID()
 
         unrecordedOrderIDList = self.unrecordedItems.keys()
         #print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(days)))
-        # unrecordedOrderIDList consists of the order ID of 
-        # the items sold, remove the order item 
+        # unrecordedOrderIDList consists of the order ID of
+        # the items sold, remove the order item
         # ids that we already have records for
         # in the json file to reduce operation time
 
-                
         if len(unrecordedOrderIDList) > 0:
             # updating required
             # we have items with incomplete
             # item records
             self.get_new_items_info()
-            
         #print(self.unrecordedItems)
+
+        # before adding new items to records,
+        # append name info
+        self.append_name_info_to_records(self.unrecordedItems)
+        self.append_name_info_to_records(self.recordedItems)
         # add new unrecorded items to the record
         self._ItemsSold.update(self.unrecordedItems)
-
         self.update_json_file()
         # requestedItems will be all the items
-        # that are found to be sold in the 
+        # that are found to be sold in the
         # 'days' as specified
 
         # it will consist of the both recorded
         # and unrecorded items.
-        self.requestedItemsSold.update(self.unrecordedItems) 
+        self.requestedItemsSold.update(self.unrecordedItems)
         self.requestedItemsSold.update(self.recordedItems)
-        # for key, value in self.requestedItemsSold.iteritems():        
+        # for key, value in self.requestedItemsSold.iteritems():
         #     print(key)
         #     print(value)
+
+    def append_name_info_to_records(self, records):
+        """
+        Adds entries for long_name,
+        short_name and cost_of_item
+        taken from items held records.
+        Operates on requestedItems only
+
+        Return not required
+        """
+        ihc = ItemsHeldClass("ItemsHeld.json")
+        itemsHeld = ihc.ItemsHeld
+
+        for key, value in records.iteritems():
+            # convert long name to short name
+            # if available
+            long_name = value['ItemName'].replace(" ","")
+            if itemsHeld.get(long_name, None) is not None:
+                value['ItemName'] = itemsHeld[long_name].get('short_name', value['ItemName'])
+                value['cost_of_item'] = itemsHeld[long_name].get('cost_of_item', 'N/A')
+            else:
+                value['cost_of_item'] = 'N/A'
+
+
+    def get_items_sorted_by_date(self):
+        """
+        returns a dictionary of the
+        items with date of transaction
+        as the key
+        """
+        working_dict = {}
+        items_sold_by_date = {}
+        if self.requestedItemsSold:
+            working_dict = self.requestedItemsSold
+        else:
+            working_dict = self._ItemsSold
+
+        for orderID, item_record in working_dict.iteritems():
+            if item_record.get('ItemDate', False):
+                items_sold_by_date[item_record['ItemDate']] = item_record
+                del items_sold_by_date[item_record['ItemDate']]['ItemDate']
+        return items_sold_by_date
 
 
 # ref:
