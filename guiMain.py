@@ -19,7 +19,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.currentUser = None
         self.currentUserCredentials = None
         self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
-        self.update_items_held_tree()
+        self.display_items_held_tree()
         self.users_file = "users.json"
         try: # in case it doesnt exist
             fileHandler = open(self.users_file, 'r')
@@ -51,7 +51,14 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         short_name = str(self.lineShortName.text())
         cost_of_item = str(self.doubleSpinCostOfItem.value())
         self.itemsHeldClassHandler.add_entry(long_name, short_name, cost_of_item)
-        self.update_items_held_tree()
+        formatted_records = [
+            long_name,
+            short_name,
+            cost_of_item
+        ]
+        # add new item to items held tree
+        QtGui.QTreeWidgetItem(self.treeItemsHeld.invisibleRootItem(),
+                              formatted_records)
 
     def updateShipping(self):
         """
@@ -179,7 +186,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         json.dump(self.users, fileHandler, indent=2)
         fileHandler.close()
 
-    def update_items_held_tree(self):
+    def display_items_held_tree(self):
         self.treeItemsHeld.clear()
         item_records = self.itemsHeldClassHandler.ItemsHeld.values()
         item_records.sort()
