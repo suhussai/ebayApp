@@ -315,6 +315,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="btnDeleteItem">
+        <property name="text">
+         <string>Delete Item</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>

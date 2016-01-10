@@ -34,11 +34,22 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnGetItemsSold.clicked.connect(self.getItemsSold)
         self.btnUpdateShipping.clicked.connect(self.updateShipping)
         self.btnAddNewItem.clicked.connect(self.addNewItem)
+        self.btnDeleteItem.clicked.connect(self.deleteItem)
         self.btns = [self.btnUpdateShipping, self.btnGetItemsSold,
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
                      self.btnAddUser]
         #print(self.spinBoxDays.value())
 
+    def deleteItem(self):
+        """
+        delete item held in items held records
+        """
+        records_to_be_deleted = self.treeItemsHeld.selectedItems()
+        for record in records_to_be_deleted:
+            long_name = str(record.text(0))
+            self.itemsHeldClassHandler.delete_entry(long_name)
+        # re-display items that remain
+        self.display_items_held_tree()
     def addNewItem(self):
         """
         add new item with:

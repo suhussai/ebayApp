@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Sat Jan  9 17:21:42 2016
+# Created: Sat Jan  9 17:41:47 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -154,6 +154,9 @@ class Ui_MainWindow(object):
         self.btnAddNewItem = QtGui.QPushButton(self.centralwidget)
         self.btnAddNewItem.setObjectName(_fromUtf8("btnAddNewItem"))
         self.verticalLayout_4.addWidget(self.btnAddNewItem)
+        self.btnDeleteItem = QtGui.QPushButton(self.centralwidget)
+        self.btnDeleteItem.setObjectName(_fromUtf8("btnDeleteItem"))
+        self.verticalLayout_4.addWidget(self.btnDeleteItem)
         self.horizontalLayout.addLayout(self.verticalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -196,6 +199,7 @@ class Ui_MainWindow(object):
         self.label_10.setText(_translate("MainWindow", "Short Name", None))
         self.label_9.setText(_translate("MainWindow", "Cost of Item", None))
         self.btnAddNewItem.setText(_translate("MainWindow", "Add New Item", None))
+        self.btnDeleteItem.setText(_translate("MainWindow", "Delete Item", None))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))
         self.toolBar_2.setWindowTitle(_translate("MainWindow", "toolBar_2", None))
 
