@@ -4,12 +4,23 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import QThread, SIGNAL
 import sys
 import design
+import genericDialog
 import os
 import json
 import xlsxwriter
 from ItemInfoModule import ItemInfoClass
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
+
+class genDialog(QtGui.QDialog, genericDialog.Ui_Dialog):
+    def __init__(self, textToDisplay="Not Set", parent=None):
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+        self.labelOutput.setText(textToDisplay)
+        self.btnConfirm.clicked.connect(self.closeDialog)
+
+    def closeDialog(self):
+        self.done(0)
 
 class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -116,6 +127,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         self.setAllButtons(self.btnGetItemsSold, True) # turn on all buttons
         self.get_thread.terminate()
+        self.genDialog = genDialog("Finished Getting Items Sold.\n"
+                                   "Exported spreadsheet is ready.")
+        self.genDialog.show()
 
     def get_credentials_of_selected_user(self):
         """
@@ -271,14 +285,10 @@ class getItemsSoldThread(QThread):
         ws.write(3, 10, "Profit")
         order_num = 1
         row_num = 4
-        print(items)
         for item in items:
             transaction_date = item[0]
             item_record = item[1]
-            print(transaction_date)
-            print(item_record)
-            print("---------------------")
-            #ws.write(row_num, 0, order_num)
+            ws.write(row_num, 0, order_num)
             ws.write(row_num, 1, transaction_date)
             ws.write(row_num, 2, item_record['ItemName'])
             ws.write(row_num, 3, item_record['ItemPrice'])
