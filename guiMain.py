@@ -6,6 +6,7 @@ import sys
 import design
 import os
 import json
+import xlsxwriter
 from ItemInfoModule import ItemInfoClass
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
@@ -21,6 +22,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
         self.display_items_held_tree()
         self.users_file = "users.json"
+        self.targetHtmlFile = "target.html"
         try: # in case it doesnt exist
             fileHandler = open(self.users_file, 'r')
             self.users = json.load(fileHandler)
@@ -35,6 +37,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnUpdateShipping.clicked.connect(self.updateShipping)
         self.btnAddNewItem.clicked.connect(self.addNewItem)
         self.btnDeleteItem.clicked.connect(self.deleteItem)
+        #self.btnExportToSpreadsheet.clicked.connect(self.exportToSpreadsheet)
         self.btns = [self.btnUpdateShipping, self.btnGetItemsSold,
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
                      self.btnAddUser]
@@ -46,6 +49,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         records_to_be_deleted = self.treeItemsHeld.selectedItems()
         for record in records_to_be_deleted:
+            # column zero is long_name
+            # followed by short_name
+            # and cost_of_item
             long_name = str(record.text(0))
             self.itemsHeldClassHandler.delete_entry(long_name)
         # re-display items that remain
@@ -79,10 +85,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         self.setAllButtons(self.btnGetItemsSold, False)
         #days, ids = get_credentials_of_selected_user()
-        self.targetHtmlFile = "target.html"
         self.get_thread = updateShippingInfoThread(self.targetHtmlFile)
         self.connect(self.get_thread,
-                     SIGNAL('finished_updating_shipping(PyQt_PyObject)'),
+                     SIGNAL('finished_updating_shipping()'),
                      self.finished_getting_items_sold)
         self.get_thread.start()
         print("thread started")
@@ -96,8 +101,6 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         for btn in all_other_btns:
             btn.setEnabled(state_of_all_other_buttons)
 
-
-
     def finished_updating_shipping(self):
         """
         to be run when the getting new
@@ -106,8 +109,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setAllButtons(self.btnUpdateShipping, True) # turn on all buttons
         self.get_thread.terminate()
 
-
-    def finished_getting_items_sold(self, requestedItemsSold):
+    def finished_getting_items_sold(self):
         """
         to be run when the getting new
         items sold process is completed
@@ -133,10 +135,10 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setAllButtons(self.btnGetItemsSold, False)
         ids, days = self.get_credentials_of_selected_user()
 
-        self.get_thread = getItemsSoldThread(days, ids)
+        self.get_thread = getItemsSoldThread(days, ids, "FIXME")
         #self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
         self.connect(self.get_thread,
-                     SIGNAL('finished_getting_items_sold(PyQt_PyObject)'),
+                     SIGNAL('finished_getting_items_sold()'),
                      self.finished_getting_items_sold)
 
         self.get_thread.start()
@@ -233,10 +235,11 @@ class updateShippingInfoThread(QThread):
         self.emit(SIGNAL('finished_updating_shipping()'))
 
 class getItemsSoldThread(QThread):
-    def __init__(self, days, ids):
+    def __init__(self, days, ids, spreadsheetName):
         QThread.__init__(self)
         self.days = days
         self.ids = ids
+        self.spreadsheetName = spreadsheetName
 
     def __del__(self):
         self.wait()
@@ -251,8 +254,46 @@ class getItemsSoldThread(QThread):
         """
         iic = ItemInfoClass("ItemInfo.json", self.days, self.ids)
         iic.get_new_items_sold()
-        self.emit(SIGNAL('finished_getting_items_sold(PyQt_PyObject)'),
-                  iic.requestedItemsSold)
+        items = sorted(iic.get_items_sorted_by_date().items())
+
+        wb = xlsxwriter.Workbook("output2.xlsx")
+        ws = wb.add_worksheet()
+        ws.write(3, 0, "Order #")
+        ws.write(3, 1, "Date")
+        ws.write(3, 2, "Name")
+        ws.write(3, 3, "Price of Item")
+        ws.write(3, 4, "Cost of Item")
+        ws.write(3, 5, "Hassan")
+        ws.write(3, 6, "Shipping Cost")
+        ws.write(3, 7, "PayPal Fees")
+        ws.write(3, 8, "eBay Fees")
+        ws.write(3, 9, "Total Cost")
+        ws.write(3, 10, "Profit")
+        order_num = 1
+        row_num = 4
+        print(items)
+        for item in items:
+            transaction_date = item[0]
+            item_record = item[1]
+            print(transaction_date)
+            print(item_record)
+            print("---------------------")
+            #ws.write(row_num, 0, order_num)
+            ws.write(row_num, 1, transaction_date)
+            ws.write(row_num, 2, item_record['ItemName'])
+            ws.write(row_num, 3, item_record['ItemPrice'])
+            ws.write(row_num, 4, item_record.get('cost_of_item', 'N/A'))
+            ws.write(row_num, 5, "$7.00")
+            ws.write(row_num, 6, item_record.get('ShippingLabelCost','N/A'))
+            ws.write(row_num, 7, "???")
+            ws.write(row_num, 8, "???")
+            ws.write(row_num, 9, "???")
+            ws.write(row_num, 10, "???")
+            order_num = order_num + 1
+            row_num = row_num + 1
+        wb.close()
+        self.emit(SIGNAL('finished_getting_items_sold()'))
+
 def main():
     app = QtGui.QApplication(sys.argv)
     form = eBayApp()
