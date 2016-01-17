@@ -138,15 +138,19 @@ class ShippingInfoClass:
         """
         # http://stackoverflow.com/questions/6591931/getting-file-size-in-python
         # http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
-        current_files_time_last_modified = os.path.getmtime(self.targetHtmlFile)
-        current_files_size = os.path.getsize(self.targetHtmlFile)
-        if str(current_files_time_last_modified) == self.last_files_time_last_modified and str(current_files_size) == self.last_files_size:
-            #print("Can NOT update")
-            return False
-        else:
-            print("Can update, updating!!!")
+        try:
+            current_files_time_last_modified = os.path.getmtime(self.targetHtmlFile)
+            current_files_size = os.path.getsize(self.targetHtmlFile)
+            if str(current_files_time_last_modified) == self.last_files_time_last_modified and str(current_files_size) == self.last_files_size:
+                #print("Can NOT update")
+                return False
+            else:
+                print("Can update, updating!!!")
             return True
-
+        except:
+            # likely couldn't find file
+            print("Error")
+            return False
 
 # refs
 # https://docs.python.org/2/tutorial/classes.html

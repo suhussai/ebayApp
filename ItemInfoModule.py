@@ -5,7 +5,7 @@ import json, re
 
 class ItemInfoClass:
 
-    def __init__(self, json_fileName="ItemInfo.json", ids):
+    def __init__(self, json_fileName="ItemInfo.json", ids=None):
         """
         - initializes ItemInfoClass
         - requires underlying json file name and
@@ -13,6 +13,9 @@ class ItemInfoClass:
         """
         self.json_fileName = json_fileName
         self._ItemsSold = None
+        if ids is None:
+            print("No ids")
+            return
         self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2],
                            token=ids[3], config_file=None)
         try:
@@ -69,7 +72,7 @@ class ItemInfoClass:
                 HasMorePages = False
 
             transactionsDict = soldListDict['OrderTransactionArray']
-            transactions = trans['OrderTransaction']
+            transactions = transactionsDict['OrderTransaction']
             recorded_keys = self._ItemsSold.keys()
             for transaction in transactions:
                 orderId = transaction['Transaction']['OrderLineItemID']
@@ -80,7 +83,9 @@ class ItemInfoClass:
                     self.unrecordedItems[orderId] = {}
 
         print("Total of %s items sold in the last %d days." % (
-            numberOfPagesDict['TotalNumberOfEntries']), int(self.days)))
+            numberOfPagesDict['TotalNumberOfEntries'],int(self.days)
+        ))
+
 
 
     def _get_new_items_info(self):
@@ -148,16 +153,16 @@ class ItemInfoClass:
                 for tracking_number in tracking_numbers:
                     info = self.si.getLabelInfo(tracking_number)
                     if info is not None and "Void" not in info['ShippingStatus']:
-                        tracking_numbers_dict[float(info['ShippingLabelCost'][1:])]=
-                        {
+                        tracking_numbers_dict[float(info['ShippingLabelCost'][1:])]={
                             'ShippingLabelCost': info['ShippingLabelCost'],
                             'BuyerName': info['BuyerName'],
                             'ShippingStatus': info['ShippingStatus']
                         }
                 if len(tracking_numbers_dict.keys()) > 1:
                     highest_price = max(tracking_numbers_dict.keys())
-                    self.unrecordedItems[orderID]['ShippingStatus'] =
-                    tracking_numbers_dict[highest_price]['ShippingStatus']
+                    self.unrecordedItems[orderID]['ShippingStatus'] = (
+                        tracking_numbers_dict[highest_price]['ShippingStatus']
+                    )
                     self.unrecordedItems[orderID]['BuyerName'] = (
                         tracking_numbers_dict[highest_price]['BuyerName']
                         )
@@ -209,7 +214,7 @@ class ItemInfoClass:
         self._append_name_info_to_records(self.recordedItems)
         # add new unrecorded items to the record
         self._ItemsSold.update(self.unrecordedItems)
-        self.update_json_file()
+        self._update_json_file()
         # requestedItems will be all the items
         # that are found to be sold in the
         # 'days' as specified
