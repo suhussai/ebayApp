@@ -25,7 +25,7 @@ class ItemInfoClass:
         except:
             self._ItemsSold = {}
 
-        self.si = ShippingInfoClass('ShippingInfo.json', 'target.html')
+        self.si = ShippingInfoClass('ShippingInfo.json', 'My eBay.html')
         self.recordedItems = {} # holds recorded items
         self.unrecordedItems = {} # holds unrecorded items
         self.requestedItemsSold = {} # holds the items that are
@@ -165,7 +165,7 @@ class ItemInfoClass:
                     )
                     self.unrecordedItems[orderID]['BuyerName'] = (
                         tracking_numbers_dict[highest_price]['BuyerName']
-                        )
+                    )
                     self.unrecordedItems[orderID]['ShippingLabelCost']= (
                         tracking_numbers_dict[highest_price]['ShippingLabelCost']
                     )
@@ -245,8 +245,8 @@ class ItemInfoClass:
             long_name = value['ItemName'].replace(" ","")
             if itemsHeld.get(long_name, None) is not None:
                 value['ItemName'] = itemsHeld[long_name].get('short_name', value['ItemName'])
-                value['cost_of_item'] = itemsHeld[long_name].get('cost_of_item', 'N/A')
-            else:
+                value['cost_of_item'] = itemsHeld[long_name].get('cost_of_item')
+            elif value.get('cost_of_item', None) is None:
                 value['cost_of_item'] = 'N/A'
 
 
