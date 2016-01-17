@@ -2,9 +2,10 @@
 Ebay App For User Management  
 
 # TODO
-Jan. 7 2016
-- implement method of exporting item info to spreadsheet with proper formatting
-- implement method to update, add and delete items in items held record
+Last Updated Jan. 16 2016
+- fix issue: crashing when deciding whether to update shipping info when file doesn't exist  
+- implement method of exporting item info to spreadsheet with proper formatting -- Done
+- implement method to update, add and delete items in items held record -- Done
 
 
 # Dependencies
