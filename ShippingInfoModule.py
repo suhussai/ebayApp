@@ -5,7 +5,14 @@ import os, re, json
 
 class ShippingInfoClass:
 
-    def __init__(self, json_fileName, targetHtmlFile):
+    def __init__(self, json_fileName="ShippingInfo.json",
+                 targetHtmlFile="My eBay.html"):
+        """
+        initializing function
+        - requires the underlying json file record
+        - requires targetHtmlFile where the shipping info,
+        mainly the shipping cost, will be 'web crawled' out.
+        """
         self.json_fileName = json_fileName
         self.targetHtmlFile = targetHtmlFile
         try:
@@ -25,7 +32,7 @@ class ShippingInfoClass:
         self.last_files_size = \
                         self.ShippingInfo["update_file"]["file_size"]
 
-    def update_json_file(self):
+    def _update_json_file(self):
         """
         update main json file by
         overwriting its contents
@@ -88,13 +95,23 @@ class ShippingInfoClass:
                                                   name}
         count_after = len(self.ShippingInfo)
         print("Count before: %d and after: %d, resulting in an increase of %d entries/entry." %(count_before, count_after, count_after-count_before))
-        self.update_json_file()
+        self._update_json_file()
 
 
     #print(shippingInfo)
     #print(shippingInfo["millerbritt"]["ShippingLabelCost"])
 
     def getLabelInfo(self, key):
+        """
+        returns label info for key.
+        arguments:
+        key: is the item tracking number
+        for which we will check if we have
+        shipping info for.
+        If item tracking number doesn't exist,
+        the function will check if we need to
+        update, and will do so if necessary.
+        """
         result = self.ShippingInfo.get(key, None)
         if result is not None:
             # if key is found
@@ -103,7 +120,7 @@ class ShippingInfoClass:
 
         # if not, see if we can update
         # the ShippingInfo variable
-        if self.shouldWeUpdate():
+        if self._shouldWeUpdate():
             self.update_ShippingInfo_and_file()
             # return the result
             # from the updated
@@ -112,8 +129,12 @@ class ShippingInfoClass:
             # it is not created...
             return self.ShippingInfo.get(key, None)
 
-    def shouldWeUpdate(self):
+    def _shouldWeUpdate(self):
         """
+        check if we need to update shipping info.
+        Criteria (Update if:):
+        - we have a newer file
+        - we have a bigger file
         """
         # http://stackoverflow.com/questions/6591931/getting-file-size-in-python
         # http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
