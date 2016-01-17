@@ -33,7 +33,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
         self.display_items_held_tree()
         self.users_file = "users.json"
-        self.targetHtmlFile = "target.html"
+        self.targetHtmlFile = "My eBay.html"
         try: # in case it doesnt exist
             fileHandler = open(self.users_file, 'r')
             self.users = json.load(fileHandler)
@@ -277,14 +277,17 @@ class getItemsSoldThread(QThread):
         ws.write(3, 2, "Name")
         ws.write(3, 3, "Price of Item")
         ws.write(3, 4, "Cost of Item")
-        ws.write(3, 5, "Hassan")
-        ws.write(3, 6, "Shipping Cost")
-        ws.write(3, 7, "PayPal Fees")
-        ws.write(3, 8, "eBay Fees")
-        ws.write(3, 9, "Total Cost")
-        ws.write(3, 10, "Profit")
+        ws.write(3, 5, "Shipping Status")
+        ws.write(3, 6, "Hassan")
+        ws.write(3, 7, "Shipping Cost")
+        ws.write(3, 8, "PayPal Fees")
+        ws.write(3, 9, "eBay Fees")
+        ws.write(3, 10, "Total Cost")
+        ws.write(3, 11, "Profit")
+        ws.write(3, 12, "ItemTrackingNumber")
         order_num = 1
-        row_num = 4
+        row_num = 4 # this arbitrary, decides where we start filling
+        # cells in the spreadsheet
         for item in items:
             transaction_date = item[0]
             item_record = item[1]
@@ -293,12 +296,14 @@ class getItemsSoldThread(QThread):
             ws.write(row_num, 2, item_record['ItemName'])
             ws.write(row_num, 3, item_record['ItemPrice'])
             ws.write(row_num, 4, item_record.get('cost_of_item', 'N/A'))
-            ws.write(row_num, 5, "$7.00")
-            ws.write(row_num, 6, item_record.get('ShippingLabelCost','N/A'))
-            ws.write(row_num, 7, "???")
-            ws.write(row_num, 8, "???")
-            ws.write(row_num, 9, "???")
-            ws.write(row_num, 10, "???")
+            ws.write(row_num, 5, item_record.get("ShippingStatus",'N/A'))
+            ws.write(row_num, 6, "7.00")
+            ws.write(row_num, 7, item_record.get('ShippingLabelCost','N/A')[1:])
+            ws.write_formula(row_num, 8, "=0.3 + 0.029*E"+str(row_num+1))
+            ws.write_formula(row_num, 9, "=0.1*D"+str(row_num+1))
+            ws.write_formula(row_num, 10, "=E"+str(row_num+1)+"+I"+str(row_num+1)+"+G"+str(row_num+1)+"+H"+str(row_num+1)+"+J"+str(row_num+1))
+            ws.write_formula(row_num, 11, "=D"+str(row_num+1)+"-K"+str(row_num+1))
+            ws.write(row_num, 12, str(item_record.get('ItemTrackingNumber', 'N\A')))
             order_num = order_num + 1
             row_num = row_num + 1
         wb.close()
