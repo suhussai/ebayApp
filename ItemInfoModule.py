@@ -72,7 +72,7 @@ class ItemInfoClass:
                 HasMorePages = False
 
             transactionsDict = soldListDict['OrderTransactionArray']
-            transactions = trans['OrderTransaction']
+            transactions = transactionsDict['OrderTransaction']
             recorded_keys = self._ItemsSold.keys()
             for transaction in transactions:
                 orderId = transaction['Transaction']['OrderLineItemID']
@@ -83,9 +83,8 @@ class ItemInfoClass:
                     self.unrecordedItems[orderId] = {}
 
         print("Total of %s items sold in the last %d days." % (
-            numberOfPagesDict['TotalNumberOfEntries']),
-            int(self.days)
-        )
+            numberOfPagesDict['TotalNumberOfEntries'],int(self.days)
+        ))
 
 
 
@@ -215,7 +214,7 @@ class ItemInfoClass:
         self._append_name_info_to_records(self.recordedItems)
         # add new unrecorded items to the record
         self._ItemsSold.update(self.unrecordedItems)
-        self.update_json_file()
+        self._update_json_file()
         # requestedItems will be all the items
         # that are found to be sold in the
         # 'days' as specified

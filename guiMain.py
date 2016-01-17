@@ -266,8 +266,8 @@ class getItemsSoldThread(QThread):
         - destroy class
         - destroy thread
         """
-        iic = ItemInfoClass("ItemInfo.json", self.days, self.ids)
-        iic.get_new_items_sold()
+        iic = ItemInfoClass("ItemInfo.json",  self.ids)
+        iic.get_new_items_sold(self.days)
         items = sorted(iic.get_items_sorted_by_date().items())
 
         wb = xlsxwriter.Workbook("output2.xlsx")
