@@ -18,9 +18,29 @@ class genDialog(QtGui.QDialog, genericDialog.Ui_Dialog):
         self.setupUi(self)
         self.labelOutput.setText(textToDisplay)
         self.btnConfirm.clicked.connect(self.closeDialog)
+        self.setProgressValue(0)
+        self.disableOKButton()
 
     def closeDialog(self):
         self.done(0)
+
+    def setProgressValue(self, newValue):
+        """
+        assigns 'newValue' to be the
+        new the progress bar value
+        """
+        try:
+            self.progressBar.setValue(int(newValue))
+        except:
+            self.progressBar.setValue(0)
+    def getProgressValue(self):
+        return self.progressBar.value()
+
+    def enableOKButton(self):
+        self.btnConfirm.setEnabled(True)
+
+    def disableOKButton(self):
+        self.btnConfirm.setEnabled(False)
 
 class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -127,9 +147,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         self.setAllButtons(self.btnGetItemsSold, True) # turn on all buttons
         self.get_thread.terminate()
-        self.genDialog = genDialog("Finished Getting Items Sold.\n"
-                                   "Exported spreadsheet is ready.")
-        self.genDialog.show()
+        self.genDialog.enableOKButton()
 
     def get_credentials_of_selected_user(self):
         """
@@ -155,8 +173,14 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
                      SIGNAL('finished_getting_items_sold()'),
                      self.finished_getting_items_sold)
 
+        self.genDialog = genDialog("Getting Items Sold.\nPlease Wait...")
+        self.connect(self.get_thread,
+                     SIGNAL('genDialog.setProgressValue(QString)'),
+                     self.genDialog.setProgressValue)
+
         self.get_thread.start()
         print("thread started")
+        self.genDialog.show()
 
 
     def selectAsCurrentUser(self):
@@ -258,6 +282,10 @@ class getItemsSoldThread(QThread):
     def __del__(self):
         self.wait()
 
+    def emitNewProgressValue(self, progressValue):
+        if progressValue <= 100:
+            self.emit(SIGNAL("genDialog.setProgressValue(QString)"), str(progressValue))
+
     def run(self):
         """
         main function of the thread
@@ -266,10 +294,24 @@ class getItemsSoldThread(QThread):
         - destroy class
         - destroy thread
         """
+        progressValue = 0
+        # Step 0: initiate proper class object
         iic = ItemInfoClass("ItemInfo.json",  self.ids)
-        iic.get_new_items_sold(self.days)
-        items = sorted(iic.get_items_sorted_by_date().items())
+        progressValue += 10
+        self.emitNewProgressValue(progressValue)
 
+        # Step 1: get new items sold
+        iic.get_new_items_sold(self.days)
+        progressValue += 40
+        self.emitNewProgressValue(progressValue)
+
+        # Step 2: rearrange dictionary so key is now date
+        # and turn dict into list sorted by date
+        items = sorted(iic.get_items_sorted_by_date().items())
+        progressValue += 20
+        self.emitNewProgressValue(progressValue)
+
+        # Step 3: write to excel file
         wb = xlsxwriter.Workbook("output2.xlsx")
         ws = wb.add_worksheet()
         ws.write(3, 0, "Order #")
@@ -306,7 +348,12 @@ class getItemsSoldThread(QThread):
             ws.write(row_num, 12, str(item_record.get('ItemTrackingNumber', 'N\A')))
             order_num = order_num + 1
             row_num = row_num + 1
+            progressValue += int(len(items)/25)
+            self.emitNewProgressValue(progressValue)
+
         wb.close()
+        progressValue = 100
+        self.emitNewProgressValue(progressValue)
         self.emit(SIGNAL('finished_getting_items_sold()'))
 
 def main():
