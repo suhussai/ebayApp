@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'genericDialog.ui'
 #
-# Created: Sun Jan 10 12:10:52 2016
+# Created: Tue Jan 19 12:15:22 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,6 +32,10 @@ class Ui_Dialog(object):
         self.labelOutput = QtGui.QLabel(Dialog)
         self.labelOutput.setObjectName(_fromUtf8("labelOutput"))
         self.verticalLayout.addWidget(self.labelOutput)
+        self.progressBar = QtGui.QProgressBar(Dialog)
+        self.progressBar.setProperty("value", 24)
+        self.progressBar.setObjectName(_fromUtf8("progressBar"))
+        self.verticalLayout.addWidget(self.progressBar)
         self.btnConfirm = QtGui.QPushButton(Dialog)
         self.btnConfirm.setObjectName(_fromUtf8("btnConfirm"))
         self.verticalLayout.addWidget(self.btnConfirm)
