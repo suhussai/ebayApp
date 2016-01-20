@@ -19,7 +19,6 @@ class genDialog(QtGui.QDialog, genericDialog.Ui_Dialog):
         self.labelOutput.setText(textToDisplay)
         self.btnConfirm.clicked.connect(self.closeDialog)
         self.setProgressValue(0)
-        self.disableOKButton()
 
     def closeDialog(self):
         self.done(0)
@@ -37,6 +36,9 @@ class genDialog(QtGui.QDialog, genericDialog.Ui_Dialog):
             self.progressBar.setValue(0)
     def getProgressValue(self):
         return self.progressBar.value()
+
+    def disableProgressBar(self):
+        self.progressBar.hide()
 
     def enableOKButton(self):
         self.btnConfirm.setEnabled(True)
@@ -167,6 +169,15 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def getItemsSold(self):
         self.setAllButtons(self.btnGetItemsSold, False)
+        if self.currentUserCredentials is None:
+            self.genDialogNoUserSelected = genDialog(
+                "Select A User First."
+            )
+            self.genDialogNoUserSelected.disableProgressBar()
+            self.genDialogNoUserSelected.show()
+            self.genDialogNoUserSelected.enableOKButton()
+            return
+
         ids, days = self.get_credentials_of_selected_user()
 
         self.get_thread = getItemsSoldThread(days, ids, "FIXME")
@@ -176,6 +187,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
                      self.finished_getting_items_sold)
 
         self.genDialog = genDialog("Getting Items Sold.\nPlease Wait...")
+        self.genDialog.disableOKButton()
         self.connect(self.get_thread,
                      SIGNAL('genDialog.setProgressValue(QString)'),
                      self.genDialog.setProgressValue)
