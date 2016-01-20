@@ -186,16 +186,15 @@ class ItemInfoClass:
 
     def get_new_items_sold(self, days):
         """
-        function meant to be used by developers initializing the class
+        function meant to be used by developers using the class
         - requires days as an argument (string or int) which
         represents the number of days in the past one requires
-        items sold.
+        the items sold.
         """
         self.days = days
         self._get_new_items_orderID()
 
         unrecordedOrderIDList = self.unrecordedItems.keys()
-        #print("Total of %s items sold in the last %d days." % (int(response.dict()['SoldList']['PaginationResult']['TotalNumberOfEntries']), int(days)))
         # unrecordedOrderIDList consists of the order ID of
         # the items sold, remove the order item
         # ids that we already have records for
@@ -206,7 +205,6 @@ class ItemInfoClass:
             # we have items with incomplete
             # item records
             self._get_new_items_info()
-        #print(self.unrecordedItems)
 
         # before adding new items to records,
         # append name info
@@ -223,6 +221,8 @@ class ItemInfoClass:
         # and unrecorded items.
         self.requestedItemsSold.update(self.unrecordedItems)
         self.requestedItemsSold.update(self.recordedItems)
+
+        return self._format_items_sorted_by_date()
         # for key, value in self.requestedItemsSold.iteritems():
         #     print(key)
         #     print(value)
@@ -250,7 +250,7 @@ class ItemInfoClass:
                 value['cost_of_item'] = 'N/A'
 
 
-    def get_items_sorted_by_date(self):
+    def _format_items_sorted_by_date(self):
         """
         returns a dictionary of the
         items with date of transaction
