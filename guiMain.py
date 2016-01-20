@@ -405,3 +405,4 @@ if __name__ == '__main__':
 
 # http://stackoverflow.com/questions/13269936/python-qt-progressbar
 # https://www.daniweb.com/programming/software-development/threads/406217/how-do-i-enabledisable-pyqt-pushbutton
+# http://nullege.com/codes/search/PyQt4.QtGui.QPushButton.hide
