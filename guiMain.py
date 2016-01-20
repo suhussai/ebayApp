@@ -31,6 +31,8 @@ class genDialog(QtGui.QDialog, genericDialog.Ui_Dialog):
         """
         try:
             self.progressBar.setValue(int(newValue))
+            if (int(newValue) >= 100):
+                self.labelOutput.setText("Finished!")
         except:
             self.progressBar.setValue(0)
     def getProgressValue(self):
@@ -272,6 +274,21 @@ class updateShippingInfoThread(QThread):
         sic.update_ShippingInfo_and_file()
         self.emit(SIGNAL('finished_updating_shipping()'))
 
+
+class itemsSoldThread(QThread):
+    def __init__(self, days, ids):
+        QThread.__init__(self)
+        self.days = days
+        self.ids = ids
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        iic = ItemInfoClass("ItemInfo.json",  self.ids)
+        items = sorted(iic.get_new_items_sold(self.days).items())
+        self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
+
 class getItemsSoldThread(QThread):
     def __init__(self, days, ids, spreadsheetName):
         QThread.__init__(self)
@@ -286,6 +303,10 @@ class getItemsSoldThread(QThread):
         if progressValue <= 100:
             self.emit(SIGNAL("genDialog.setProgressValue(QString)"), str(progressValue))
 
+    def update_items(self, items):
+        self.items = items
+        self.new_items_sold_thread.terminate()
+
     def run(self):
         """
         main function of the thread
@@ -294,24 +315,27 @@ class getItemsSoldThread(QThread):
         - destroy class
         - destroy thread
         """
+
+        self.new_items_sold_thread = itemsSoldThread(self.days, self.ids)
+        self.connect(self.new_items_sold_thread,
+                     SIGNAL('update_items(PyQt_PyObject)'),
+                     self.update_items)
+        self.new_items_sold_thread.start()
+        print("thread started")
+        #empty = "empty"
+        self.items = 0
         progressValue = 0
-        # Step 0: initiate proper class object
-        iic = ItemInfoClass("ItemInfo.json",  self.ids)
-        progressValue += 10
-        self.emitNewProgressValue(progressValue)
+        while(self.items is 0):
+            print("sleeping")
+            time.sleep(0.5)
+            if (progressValue <= 70):
+                print("changing to " + str(progressValue))
+                progressValue += (70)/self.days
+                self.emitNewProgressValue(progressValue)
 
-        # Step 1: get new items sold
-        iic.get_new_items_sold(self.days)
-        progressValue += 40
-        self.emitNewProgressValue(progressValue)
-
-        # Step 2: rearrange dictionary so key is now date
-        # and turn dict into list sorted by date
-        items = sorted(iic.get_items_sorted_by_date().items())
-        progressValue += 20
-        self.emitNewProgressValue(progressValue)
-
-        # Step 3: write to excel file
+        print("freed!!!!!")
+        print(self.items)
+        # Step 2: write to excel file
         wb = xlsxwriter.Workbook("output2.xlsx")
         ws = wb.add_worksheet()
         ws.write(3, 0, "Order #")
@@ -330,7 +354,7 @@ class getItemsSoldThread(QThread):
         order_num = 1
         row_num = 4 # this arbitrary, decides where we start filling
         # cells in the spreadsheet
-        for item in items:
+        for item in self.items:
             transaction_date = item[0]
             item_record = item[1]
             ws.write(row_num, 0, order_num)
@@ -348,7 +372,7 @@ class getItemsSoldThread(QThread):
             ws.write(row_num, 12, str(item_record.get('ItemTrackingNumber', 'N\A')))
             order_num = order_num + 1
             row_num = row_num + 1
-            progressValue += int(len(items)/25)
+            progressValue += int(len(self.items)/25)
             self.emitNewProgressValue(progressValue)
 
         wb.close()
