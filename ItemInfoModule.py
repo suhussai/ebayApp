@@ -2,6 +2,7 @@ from ebaysdk.trading import Connection as Trading
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
 import json, re
+from pathFunction import resource_path
 
 class ItemInfoClass:
 
@@ -11,7 +12,7 @@ class ItemInfoClass:
         - requires underlying json file name and
         ids required for access ebay API
         """
-        self.json_fileName = json_fileName
+        self.json_fileName = resource_path(json_fileName)
         self._ItemsSold = None
         if ids is None:
             print("No ids")

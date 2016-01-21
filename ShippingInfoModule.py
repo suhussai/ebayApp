@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 #from constants import shippingInfo, targetHtmlFile
 import os, re, json
+from pathFunction import resource_path
 
 
 class ShippingInfoClass:
@@ -13,7 +14,7 @@ class ShippingInfoClass:
         - requires targetHtmlFile where the shipping info,
         mainly the shipping cost, will be 'web crawled' out.
         """
-        self.json_fileName = json_fileName
+        self.json_fileName = resource_path(json_fileName)
         self.targetHtmlFile = targetHtmlFile
         try:
             fileHandler = open(self.json_fileName, 'r')

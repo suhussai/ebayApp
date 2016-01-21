@@ -12,6 +12,8 @@ from ItemInfoModule import ItemInfoClass
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
 from dialogModule import genDialog
+from pathFunction import resource_path
+
 
 class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -21,16 +23,18 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.users = None
         self.currentUser = None
         self.currentUserCredentials = None
-        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
+        self.itemsHeldClassHandler = ItemsHeldClass(resource_path("ItemsHeld.json"))
         self.display_items_held_tree()
-        self.users_file = "users.json"
+
+        self.users_file = resource_path("users.json")
         self.targetHtmlFile = "My eBay.html"
         try: # in case it doesnt exist
             fileHandler = open(self.users_file, 'r')
             self.users = json.load(fileHandler)
             fileHandler.close()
             self.update_list_user_widget()
-        except:
+        except Exception as e:
+            print(str(e))
             self.users = {}
         self.btnAddUser.clicked.connect(self.addUser)
         self.btnDeleteUser.clicked.connect(self.deleteUser)
@@ -44,6 +48,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
                      self.btnAddUser]
         #print(self.spinBoxDays.value())
+
+
+
 
     def deleteItem(self):
         """
@@ -277,7 +284,7 @@ class updateShippingInfoThread(QThread):
         - destroy class
         - destroy thread
         """
-        sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile)
+        sic = ShippingInfoClass(resource_path("ShippingInfo.json"), self.targetHtmlFile)
         sic.update_ShippingInfo_and_file()
         self.emit(SIGNAL('finished_updating_shipping()'))
 
@@ -293,7 +300,7 @@ class itemsSoldThread(QThread):
 
     def run(self):
         try:
-            iic = ItemInfoClass("ItemInfo.json",  self.ids)
+            iic = ItemInfoClass(resource_path("ItemInfo.json"),  self.ids)
             items = sorted(iic.get_new_items_sold(self.days).items())
             self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
         except Exception as e:

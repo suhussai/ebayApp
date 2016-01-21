@@ -1,9 +1,10 @@
 import json
+from pathFunction import resource_path
 
 class ItemsHeldClass:
 
     def __init__(self, json_fileName):
-        self.json_fileName = json_fileName
+        self.json_fileName = resource_path(json_fileName)
         try:
             fileHandler = open(self.json_fileName, 'r')
             self.ItemsHeld = json.load(fileHandler)
