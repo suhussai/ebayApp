@@ -134,8 +134,32 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         ]
         return ids, days
 
+    def errorHandlingForItemsSold(self, errorMessage):
+        # terminate thread
+        self.get_thread.terminate()
+
+        # release all buttons
+        self.setAllButtons(self.btnGetItemsSold, True)
+
+        # enable ok button on dialog
+        self.genDialog.enableOKButton()
+
+        # display error in dialog
+        # alloted for the thread
+        # to display progress and such
+        self.displayError(errorMessage, self.genDialog)
+
+    def displayError(self, errorMessage, errorDialog=None):
+        self.errorDialog = errorDialog
+        if errorDialog is None:
+            self.error = genDialog()
+
+        self.errorDialog.setText(
+            "Error:\n" + errorMessage
+        )
+        self.errorDialog.formatForGenericErrorDisplaying()
+
     def getItemsSold(self):
-        self.setAllButtons(self.btnGetItemsSold, False)
         if self.currentUserCredentials is None:
             self.genDialogNoUserSelected = genDialog(
                 "Select A User First."
@@ -145,6 +169,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
             self.genDialogNoUserSelected.enableOKButton()
             return
 
+        self.setAllButtons(self.btnGetItemsSold, False)
         ids, days = self.get_credentials_of_selected_user()
 
         self.get_thread = getItemsSoldThread(days, ids, "FIXME")
@@ -152,6 +177,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.connect(self.get_thread,
                      SIGNAL('finished_getting_items_sold()'),
                      self.finished_getting_items_sold)
+        self.connect(self.get_thread,
+                     SIGNAL('errorHandlingForItemsSold(QString)'),
+                     self.errorHandlingForItemsSold)
 
         self.genDialog = genDialog("Getting Items Sold.\nPlease Wait...")
         self.genDialog.disableOKButton()
@@ -264,9 +292,12 @@ class itemsSoldThread(QThread):
         self.wait()
 
     def run(self):
-        iic = ItemInfoClass("ItemInfo.json",  self.ids)
-        items = sorted(iic.get_new_items_sold(self.days).items())
-        self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
+        try:
+            iic = ItemInfoClass("ItemInfo.json",  self.ids)
+            items = sorted(iic.get_new_items_sold(self.days).items())
+            self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
+        except Exception as e:
+            self.emit(SIGNAL("errorHandlingForItemsSold(QString)"), str(e))
 
 class getItemsSoldThread(QThread):
     def __init__(self, days, ids, spreadsheetName):
@@ -281,6 +312,10 @@ class getItemsSoldThread(QThread):
     def emitNewProgressValue(self, progressValue):
         if progressValue <= 100:
             self.emit(SIGNAL("genDialog.setProgressValue(QString)"), str(progressValue))
+
+    def errorHandlingForItemsSold(self, errorMessage):
+        self.emit(SIGNAL('errorHandlingForItemsSold(QString)'), errorMessage)
+        self.new_items_sold_thread.terminate()
 
     def update_items(self, items):
         self.items = items
@@ -299,6 +334,9 @@ class getItemsSoldThread(QThread):
         self.connect(self.new_items_sold_thread,
                      SIGNAL('update_items(PyQt_PyObject)'),
                      self.update_items)
+        self.connect(self.new_items_sold_thread,
+                     SIGNAL('errorHandlingForItemsSold(QString)'),
+                     self.errorHandlingForItemsSold)
         self.new_items_sold_thread.start()
         print("thread started")
         #empty = "empty"
