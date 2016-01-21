@@ -146,44 +146,51 @@ class ItemInfoClass:
 
             # attach shipping info
             # to items
-            orderIDs = self.unrecordedItems.keys()
-            for orderID in orderIDs:
-                tracking_numbers = self.unrecordedItems[orderID].get('ItemTrackingNumber', [])
-                #print(tracking_numbers)
-                tracking_numbers_dict = {}
-                for tracking_number in tracking_numbers:
-                    info = self.si.getLabelInfo(tracking_number)
-                    if info is not None and "Void" not in info['ShippingStatus']:
-                        tracking_numbers_dict[float(info['ShippingLabelCost'][1:])]={
-                            'ShippingLabelCost': info['ShippingLabelCost'],
-                            'BuyerName': info['BuyerName'],
-                            'ShippingStatus': info['ShippingStatus']
-                        }
-                if len(tracking_numbers_dict.keys()) > 1:
-                    highest_price = max(tracking_numbers_dict.keys())
-                    self.unrecordedItems[orderID]['ShippingStatus'] = (
-                        tracking_numbers_dict[highest_price]['ShippingStatus']
-                    )
-                    self.unrecordedItems[orderID]['BuyerName'] = (
-                        tracking_numbers_dict[highest_price]['BuyerName']
-                    )
-                    self.unrecordedItems[orderID]['ShippingLabelCost']= (
-                        tracking_numbers_dict[highest_price]['ShippingLabelCost']
-                    )
-                elif len(tracking_numbers_dict.keys()) == 1:
-                    highest_price = tracking_numbers_dict.keys()[0]
-                    self.unrecordedItems[orderID]['ShippingStatus'] = (
-                        tracking_numbers_dict[highest_price]['ShippingStatus']
-                    )
-                    self.unrecordedItems[orderID]['BuyerName'] = (
-                        tracking_numbers_dict[highest_price]['BuyerName']
-                    )
-                    self.unrecordedItems[orderID]['ShippingLabelCost']= (
-                        tracking_numbers_dict[highest_price]['ShippingLabelCost']
-                    )
-                else:
-                    print("Shipping Label Info Not Found")
+            self._append_shipping_info_to_records(self.unrecordedItems)
 
+    def _append_shipping_info_to_records(self, recordsWithoutShippingInfo):
+        """
+        - appends shipping info to records
+        based on the item tracking number
+        each record should have.
+        """
+        orderIDs = recordsWithoutShippingInfo.keys()
+        for orderID in orderIDs:
+            tracking_numbers = recordsWithoutShippingInfo[orderID].get('ItemTrackingNumber', [])
+            #print(tracking_numbers)
+            tracking_numbers_dict = {}
+            for tracking_number in tracking_numbers:
+                info = self.si.getLabelInfo(tracking_number)
+                if info is not None and "Void" not in info['ShippingStatus']:
+                    tracking_numbers_dict[float(info['ShippingLabelCost'][1:])]={
+                        'ShippingLabelCost': info['ShippingLabelCost'],
+                        'BuyerName': info['BuyerName'],
+                        'ShippingStatus': info['ShippingStatus']
+                    }
+            if len(tracking_numbers_dict.keys()) > 1:
+                highest_price = max(tracking_numbers_dict.keys())
+                recordsWithoutShippingInfo[orderID]['ShippingStatus'] = (
+                    tracking_numbers_dict[highest_price]['ShippingStatus']
+                )
+                recordsWithoutShippingInfo[orderID]['BuyerName'] = (
+                    tracking_numbers_dict[highest_price]['BuyerName']
+                )
+                recordsWithoutShippingInfo[orderID]['ShippingLabelCost']= (
+                    tracking_numbers_dict[highest_price]['ShippingLabelCost']
+                )
+            elif len(tracking_numbers_dict.keys()) == 1:
+                highest_price = tracking_numbers_dict.keys()[0]
+                recordsWithoutShippingInfo[orderID]['ShippingStatus'] = (
+                    tracking_numbers_dict[highest_price]['ShippingStatus']
+                )
+                recordsWithoutShippingInfo[orderID]['BuyerName'] = (
+                    tracking_numbers_dict[highest_price]['BuyerName']
+                )
+                recordsWithoutShippingInfo[orderID]['ShippingLabelCost']= (
+                    tracking_numbers_dict[highest_price]['ShippingLabelCost']
+                )
+            else:
+                print("Shipping Label Info Not Found")
 
     def get_new_items_sold(self, days):
         """
