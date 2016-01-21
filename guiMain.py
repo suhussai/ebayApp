@@ -11,40 +11,7 @@ import xlsxwriter
 from ItemInfoModule import ItemInfoClass
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
-
-class genDialog(QtGui.QDialog, genericDialog.Ui_Dialog):
-    def __init__(self, textToDisplay="Not Set", parent=None):
-        QtGui.QDialog.__init__(self, parent)
-        self.setupUi(self)
-        self.labelOutput.setText(textToDisplay)
-        self.btnConfirm.clicked.connect(self.closeDialog)
-        self.setProgressValue(0)
-
-    def closeDialog(self):
-        self.done(0)
-
-    def setProgressValue(self, newValue):
-        """
-        assigns 'newValue' to be the
-        new the progress bar value
-        """
-        try:
-            self.progressBar.setValue(int(newValue))
-            if (int(newValue) >= 100):
-                self.labelOutput.setText("Finished!")
-        except:
-            self.progressBar.setValue(0)
-    def getProgressValue(self):
-        return self.progressBar.value()
-
-    def disableProgressBar(self):
-        self.progressBar.hide()
-
-    def enableOKButton(self):
-        self.btnConfirm.setEnabled(True)
-
-    def disableOKButton(self):
-        self.btnConfirm.setEnabled(False)
+from dialogModule import genDialog
 
 class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
