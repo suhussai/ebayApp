@@ -25,14 +25,14 @@ class ItemsHeldClass:
         self.ItemsHeld.pop(long_name.replace(" ", ""), None)
 
     def get_short_name(self, long_name):
-        value = self.ItemsHeld.get(long_name, None)
+        value = self.ItemsHeld.get(long_name.replace(" ", ""), None)
         if value is not None:
             return value.get("short_name", "")
         else:
             return ""
 
     def get_cost_of_item(self, long_name):
-        value = self.ItemsHeld.get(long_name, None)
+        value = self.ItemsHeld.get(long_name.replace(" ", ""), None)
         if value is not None:
             return value.get("cost_of_item", "")
         else:
