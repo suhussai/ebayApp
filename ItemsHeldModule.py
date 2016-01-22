@@ -20,6 +20,17 @@ class ItemsHeldClass:
         }
         self.update_json_file()
 
+    def refresh_record(self):
+        """
+        reread record from file
+        """
+        try:
+            fileHandler = open(self.json_fileName, 'r')
+            self.ItemsHeld = json.load(fileHandler)
+            fileHandler.close()
+        except:
+            self.ItemsHeld = {}
+
 
     def delete_entry(self, long_name):
         self.ItemsHeld.pop(long_name.replace(" ", ""), None)

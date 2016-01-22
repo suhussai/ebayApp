@@ -33,6 +33,22 @@ class ShippingInfoClass:
         self.last_files_size = \
                         self.ShippingInfo["update_file"]["file_size"]
 
+    def refresh_record(self):
+        """
+        reread record from file
+        """
+        try:
+            fileHandler = open(self.json_fileName, 'r')
+            self.ShippingInfo = json.load(fileHandler)
+            fileHandler.close()
+        except:
+            self.ShippingInfo = {
+                "update_file": {
+                    "time_last_modified" : 0,
+                    "file_size" : 0
+                }
+            }
+
     def _update_json_file(self):
         """
         update main json file by
