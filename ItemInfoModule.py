@@ -37,6 +37,11 @@ class ItemInfoClass:
         self.requestedItemsSold = {} # holds the items that are
                                      # found in the last 'days'
 
+    def get_all_records(self):
+        self.requestedItems = None
+        return self._format_items_sorted_by_date()
+
+
     def get_entry(self, orderID):
         return self._ItemsSold.get(orderID, "")
 
