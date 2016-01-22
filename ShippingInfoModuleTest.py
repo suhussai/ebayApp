@@ -36,9 +36,9 @@ class ShippingInfoClassTest(unittest.TestCase):
         self.sic_user1.add_entry("key1", "value1")
 
         self.assertTrue(
-            self.sic_user1.get_entry("key1") == "value1"
+            self.sic_user1.get_shipping_info("key1") == "value1"
             and
-            self.sic_user2.get_entry("key1") == ""
+            self.sic_user2.get_shipping_info("key1") == ""
         )
         self.sic_user1 = None
         self.sic_user2 = None
