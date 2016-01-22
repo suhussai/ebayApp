@@ -186,9 +186,9 @@ class ShippingInfoClass:
             else:
                 print("Can update, updating!!!")
             return True
-        except:
+        except Exception as e:
             # likely couldn't find file
-            print("Error")
+            print(e)
             return False
 
 # refs
