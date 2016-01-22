@@ -208,6 +208,18 @@ class ItemInfoClass:
             else:
                 print("Shipping Label Info Not Found")
 
+
+    def refresh_records_held(self):
+        """
+        updates records we have with
+        the name and shipping info
+        in case we update name or shipping
+        info later
+        """
+        self._append_shipping_info_to_records(self._ItemsSold)
+        self._append_name_info_to_records(self._ItemsSold)
+        self._update_json_file()
+
     def get_new_items_sold(self, days):
         """
         function meant to be used by developers using the class
