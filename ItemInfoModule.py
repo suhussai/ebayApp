@@ -304,15 +304,21 @@ class ItemInfoClass:
         """
         ihc = ItemsHeldClass(self.json_fileName_ihc, user=self.currentUser)
         itemsHeld = ihc.get_records()
-        print("before loop")
         for key, value in records.iteritems():
+            # Note: it could be that the name is already changed to short
+            # thus, we wont "find" it in the records.
             # convert long name to short name
             # if available
             long_name = value['ItemName'].replace(" ","")
-            value['cost_of_item'] = '0'
             if itemsHeld.get(long_name, None) is not None:
                 value['ItemName'] = itemsHeld[long_name].get('short_name', value['ItemName'])
                 value['cost_of_item'] = itemsHeld[long_name].get('cost_of_item')
+            elif value.get('cost_of_item', None) is None:
+                # if name info is not in records
+                # then we check if the current record
+                # already has a cost of item,
+                # if it doesn't, then make it 0
+                value['cost_of_item'] = '0'
         print("finishin updating names")
 
     def _format_items_sorted_by_date(self):
