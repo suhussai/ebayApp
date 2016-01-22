@@ -19,11 +19,12 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
         super(eBayApp, self).__init__(parent)
         self.setupUi(self)
+        self.genDialog = None
         self.ser = None
         self.users = None
         self.currentUser = None
         self.currentUserCredentials = None
-        self.itemsHeldClassHandler = ItemsHeldClass(resource_path("ItemsHeld.json"))
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
         self.display_items_held_tree()
 
         self.users_file = resource_path("users.json")
@@ -43,13 +44,27 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnUpdateShipping.clicked.connect(self.updateShipping)
         self.btnAddNewItem.clicked.connect(self.addNewItem)
         self.btnDeleteItem.clicked.connect(self.deleteItem)
+        self.btnRefreshRecords.clicked.connect(self.refreshRecords)
         #self.btnExportToSpreadsheet.clicked.connect(self.exportToSpreadsheet)
         self.btns = [self.btnUpdateShipping, self.btnGetItemsSold,
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
-                     self.btnAddUser]
+                     self.btnAddUser, self.btnRefreshRecords]
         #print(self.spinBoxDays.value())
 
 
+    def refreshRecords(self):
+        """
+        - refresh item info records
+        """
+        self.setAllButtons(self.btnRefreshRecords, False)
+        self.get_thread = refreshRecordsThread()
+        self.connect(self.get_thread,
+                     SIGNAL('finished_threading()'),
+                     self.finished_threading)
+        self.connect(self.get_thread,
+                     SIGNAL('errorHandlingForThreads(QString)'),
+                     self.errorHandlingForThreads)
+        self.get_thread.start()
 
 
     def deleteItem(self):
@@ -96,12 +111,15 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         #days, ids = get_credentials_of_selected_user()
         self.get_thread = updateShippingInfoThread(self.targetHtmlFile)
         self.connect(self.get_thread,
-                     SIGNAL('finished_updating_shipping()'),
-                     self.finished_getting_items_sold)
+                     SIGNAL('finished_threading()'),
+                     self.finished_threading)
+        self.connect(self.get_thread,
+                     SIGNAL('errorHandlingForThreads(QString)'),
+                     self.errorHandlingForThreads)
         self.get_thread.start()
         print("thread started")
 
-    def setAllButtons(self, exempted_button, state_of_all_other_buttons):
+    def setAllButtons(self, exempted_button=None, state_of_all_other_buttons=False):
         """
         used for setting all other buttons in gui
         to be True or False except a pre specified btn
@@ -110,22 +128,15 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         for btn in all_other_btns:
             btn.setEnabled(state_of_all_other_buttons)
 
-    def finished_updating_shipping(self):
+    def finished_threading(self):
         """
         to be run when the getting new
         update shipping info process is completed
         """
-        self.setAllButtons(self.btnUpdateShipping, True) # turn on all buttons
+        self.setAllButtons(None, True) # turn on all buttons
         self.get_thread.terminate()
-
-    def finished_getting_items_sold(self):
-        """
-        to be run when the getting new
-        items sold process is completed
-        """
-        self.setAllButtons(self.btnGetItemsSold, True) # turn on all buttons
-        self.get_thread.terminate()
-        self.genDialog.enableOKButton()
+        if self.genDialog:
+            self.genDialog.enableOKButton()
 
     def get_credentials_of_selected_user(self):
         """
@@ -141,15 +152,12 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         ]
         return ids, days
 
-    def errorHandlingForItemsSold(self, errorMessage):
+    def errorHandlingForThreads(self, errorMessage):
         # terminate thread
         self.get_thread.terminate()
 
         # release all buttons
         self.setAllButtons(self.btnGetItemsSold, True)
-
-        # enable ok button on dialog
-        self.genDialog.enableOKButton()
 
         # display error in dialog
         # alloted for the thread
@@ -159,7 +167,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def displayError(self, errorMessage, errorDialog=None):
         self.errorDialog = errorDialog
         if errorDialog is None:
-            self.error = genDialog()
+            self.errorDialog = genDialog()
 
         self.errorDialog.setText(
             "Error:\n" + errorMessage
@@ -182,11 +190,11 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.get_thread = getItemsSoldThread(days, ids, "FIXME")
         #self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
         self.connect(self.get_thread,
-                     SIGNAL('finished_getting_items_sold()'),
-                     self.finished_getting_items_sold)
+                     SIGNAL('finished_threading()'),
+                     self.finished_threading)
         self.connect(self.get_thread,
-                     SIGNAL('errorHandlingForItemsSold(QString)'),
-                     self.errorHandlingForItemsSold)
+                     SIGNAL('errorHandlingForThreads(QString)'),
+                     self.errorHandlingForThreads)
 
         self.genDialog = genDialog("Getting Items Sold.\nPlease Wait...")
         self.genDialog.disableOKButton()
@@ -284,10 +292,27 @@ class updateShippingInfoThread(QThread):
         - destroy class
         - destroy thread
         """
-        sic = ShippingInfoClass(resource_path("ShippingInfo.json"), self.targetHtmlFile)
-        sic.update_ShippingInfo_and_file()
-        self.emit(SIGNAL('finished_updating_shipping()'))
+        try:
+            sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile)
+            sic.update_ShippingInfo_and_file()
+            self.emit(SIGNAL('finished_threading()'))
+        except Exception as e:
+            self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
+class refreshRecordsThread(QThread):
+    def __init__(self):
+        QThread.__init__(self)
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        try:
+            iic = ItemInfoClass("ItemInfo.json", "Not None")
+            iic.refresh_records_held()
+            self.emit(SIGNAL("finished_threading()"))
+        except Exception as e:
+            self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class itemsSoldThread(QThread):
     def __init__(self, days, ids):
@@ -300,11 +325,11 @@ class itemsSoldThread(QThread):
 
     def run(self):
         try:
-            iic = ItemInfoClass(resource_path("ItemInfo.json"),  self.ids)
+            iic = ItemInfoClass("ItemInfo.json",  self.ids)
             items = sorted(iic.get_new_items_sold(self.days).items())
             self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
         except Exception as e:
-            self.emit(SIGNAL("errorHandlingForItemsSold(QString)"), str(e))
+            self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class getItemsSoldThread(QThread):
     def __init__(self, days, ids, spreadsheetName):
@@ -357,8 +382,8 @@ class getItemsSoldThread(QThread):
                 progressValue += (70)/self.days
                 self.emitNewProgressValue(progressValue)
 
-        print("freed!!!!!")
-        print(self.items)
+        #print("freed!!!!!")
+        #print(self.items)
         # Step 2: write to excel file
         wb = xlsxwriter.Workbook("output2.xlsx")
         ws = wb.add_worksheet()
@@ -402,7 +427,7 @@ class getItemsSoldThread(QThread):
         wb.close()
         progressValue = 100
         self.emitNewProgressValue(progressValue)
-        self.emit(SIGNAL('finished_getting_items_sold()'))
+        self.emit(SIGNAL('finished_threading()'))
 
 def main():
     app = QtGui.QApplication(sys.argv)

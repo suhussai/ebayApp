@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Tue Jan 19 12:16:10 2016
+# Created: Thu Jan 21 20:43:12 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -117,6 +117,9 @@ class Ui_MainWindow(object):
         self.btnGetItemsSold.setSizePolicy(sizePolicy)
         self.btnGetItemsSold.setObjectName(_fromUtf8("btnGetItemsSold"))
         self.verticalLayout_4.addWidget(self.btnGetItemsSold)
+        self.btnRefreshRecords = QtGui.QPushButton(self.centralwidget)
+        self.btnRefreshRecords.setObjectName(_fromUtf8("btnRefreshRecords"))
+        self.verticalLayout_4.addWidget(self.btnRefreshRecords)
         self.btnUpdateShipping = QtGui.QPushButton(self.centralwidget)
         self.btnUpdateShipping.setObjectName(_fromUtf8("btnUpdateShipping"))
         self.verticalLayout_4.addWidget(self.btnUpdateShipping)
@@ -186,6 +189,7 @@ class Ui_MainWindow(object):
         self.btnAddUser.setText(_translate("MainWindow", "Add User", None))
         self.label_2.setText(_translate("MainWindow", "Days", None))
         self.btnGetItemsSold.setText(_translate("MainWindow", "Get Items Sold", None))
+        self.btnRefreshRecords.setText(_translate("MainWindow", "Refresh Records", None))
         self.btnUpdateShipping.setText(_translate("MainWindow", "Update Shipping", None))
         self.label_3.setText(_translate("MainWindow", "Items Held", None))
         self.treeItemsHeld.headerItem().setText(0, _translate("MainWindow", "Long Name", None))

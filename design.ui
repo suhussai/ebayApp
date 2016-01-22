@@ -213,6 +213,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btnRefreshRecords">
+        <property name="text">
+         <string>Refresh Records</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnUpdateShipping">
         <property name="text">
          <string>Update Shipping</string>
