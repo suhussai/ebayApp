@@ -73,11 +73,18 @@ class ShippingInfoClass:
         Also updates update_file key in
         the json file.
         """
+        try:
+            file_size = str(os.path.getsize(self.targetHtmlFile))
+            file_time_modified = str(os.path.getmtime(self.targetHtmlFile))
+        except:
+            file_size = str(0)
+            file_time_modified = str(0)
+
         fileHandler = open(self.json_fileName, 'w') # overwrite file
-        self.ShippingInfo["update_file"]["file_size"] = \
-                        str(os.path.getsize(self.targetHtmlFile))
-        self.ShippingInfo["update_file"]["time_last_modified"] = \
-                        str(os.path.getmtime(self.targetHtmlFile))
+        self.ShippingInfo["update_file"]["file_size"] = file_size
+
+        self.ShippingInfo["update_file"]["time_last_modified"] = file_time_modified
+
 
         self.last_files_time_last_modified = \
                         self.ShippingInfo["update_file"]["time_last_modified"]
