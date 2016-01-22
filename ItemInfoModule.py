@@ -31,6 +31,22 @@ class ItemInfoClass:
         self.unrecordedItems = {} # holds unrecorded items
         self.requestedItemsSold = {} # holds the items that are
                                      # found in the last 'days'
+
+    def get_entry(self, orderID):
+        return self._ItemsSold.get(orderID, "")
+
+    def add_entry(self, orderID, itemInfo_dict):
+        self._ItemsSold[orderID] = itemInfo_dict
+        self._update_json_file()
+
+    def delete_entry(self, orderID):
+        if self._ItemsSold.pop(orderID, None) is None:
+            # item not found (and not removed)
+            # thus we dont need to update json file
+            return
+        else:
+            self._update_json_file()
+
     def _update_json_file(self):
         """
         updates the underlying json file with the

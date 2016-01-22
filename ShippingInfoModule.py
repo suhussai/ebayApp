@@ -49,6 +49,21 @@ class ShippingInfoClass:
                 }
             }
 
+    def get_shipping_info(self, key):
+        return self.ShippingInfo.get(key, "")
+
+    def add_entry(self, key, value):
+        self.ShippingInfo[key] = value
+        self._update_json_file()
+
+    def delete_entry(self, key):
+        if self.ShippingInfo.pop(key, None) is None:
+            # item not found (and not removed)
+            # thus we dont need to update json file
+            return
+        else:
+            self._update_json_file()
+
     def _update_json_file(self):
         """
         update main json file by
