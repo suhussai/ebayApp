@@ -18,7 +18,9 @@ class ShippingInfoClass:
         self.json_fileName = resource_path(json_fileName)
         self.targetHtmlFile = targetHtmlFile
         self.currentUser = user
-        self.ShippingInfo = {}
+        self.ShippingInfo = {
+            self.currentUser: {}
+        }
         try:
             fileHandler = open(self.json_fileName, 'r')
             self.ShippingInfo = json.load(fileHandler)
