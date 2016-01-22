@@ -26,6 +26,7 @@ class ItemInfoClass:
             return
         self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2],
                            token=ids[3], config_file=None)
+
         try:
             fileHandler = open(self.json_fileName_iic, 'r')
             self._ItemsSold = json.load(fileHandler)
@@ -34,6 +35,7 @@ class ItemInfoClass:
             self._ItemsSold = {
                 self.currentUser:{}
             }
+
 
         self.recordedItems = {} # holds recorded items
         self.unrecordedItems = {} # holds unrecorded items
@@ -247,6 +249,14 @@ class ItemInfoClass:
         represents the number of days in the past one requires
         the items sold.
         """
+
+        # reset main records
+        # so we only get the records
+        # for the past 'days' only
+        print("resetting")
+        self._ItemsSold = {
+            self.currentUser:{}
+        }
         self.days = days
         self._get_new_items_orderID()
 
