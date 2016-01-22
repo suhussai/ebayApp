@@ -90,6 +90,36 @@ class ItemsHeldClassTest(unittest.TestCase):
             )
         os.remove(testFile)
 
+    def test_differentUsers(self):
+        self.ihc_user1 = ItemsHeldClass(json_fileName, user="u1")
+        self.ihc_user2 = ItemsHeldClass(json_fileName, user="u2")
+        self.ihc_user1.add_entry(
+            items_held_entry["long_name"],
+            items_held_entry["short_name"],
+            items_held_entry["cost_of_item"],
+        )
+        short_name_u1 = self.ihc_user1.get_short_name(
+            items_held_entry['long_name']
+        )
+        cost_of_item_u1 = self.ihc_user1.get_cost_of_item(
+            items_held_entry['long_name']
+        )
+        short_name_u2 = self.ihc_user2.get_short_name(
+            items_held_entry['long_name']
+        )
+        cost_of_item_u2 = self.ihc_user2.get_cost_of_item(
+            items_held_entry['long_name']
+        )
+
+        self.assertTrue(
+            short_name_u1 is items_held_entry['short_name']
+            and
+            cost_of_item_u1 is items_held_entry['cost_of_item']
+            and
+            short_name_u2 is not items_held_entry['short_name']
+            and
+            cost_of_item_u2 is not items_held_entry['cost_of_item']
+        )
 if __name__ == '__main__':
     unittest.main()
 
