@@ -22,7 +22,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.genDialog = None
         self.ser = None
         self.users = None
-        self.currentUser = None
+        self.currentUser = ""
         self.currentUserCredentials = None
         self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
         self.display_items_held_tree()
@@ -141,7 +141,6 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         all_other_btns = [btn for btn in self.btns if btn is not exempted_button]
         for btn in all_other_btns:
-            print("btn " +str(btn)+ " is going to be " + str(state_of_all_other_buttons))
             btn.setEnabled(state_of_all_other_buttons)
 
     def finished_threading(self):
@@ -359,15 +358,15 @@ class exportToSpreadsheetThread(QThread):
                 ws.write(row_num, 1, transaction_date)
                 ws.write(row_num, 2, item_record['ItemName'])
                 ws.write(row_num, 3, "="+item_record['ItemPrice'])
-                ws.write(row_num, 4, "="+item_record.get('cost_of_item', 'N/A'))
-                ws.write(row_num, 5, item_record.get("ShippingStatus",'N/A'))
+                ws.write(row_num, 4, "="+item_record.get('cost_of_item', '0'))
+                ws.write(row_num, 5, item_record.get("ShippingStatus",'Not Found'))
                 ws.write(row_num, 6, "="+"7.00")
-                ws.write(row_num, 7, "="+item_record.get('ShippingLabelCost','N/A')[1:])
+                ws.write(row_num, 7, "="+item_record.get('ShippingLabelCost','0'))
                 ws.write_formula(row_num, 8, "=0.3 + 0.029*E"+str(row_num+1))
                 ws.write_formula(row_num, 9, "=0.1*D"+str(row_num+1))
                 ws.write_formula(row_num, 10, "=E"+str(row_num+1)+"+I"+str(row_num+1)+"+G"+str(row_num+1)+"+H"+str(row_num+1)+"+J"+str(row_num+1))
                 ws.write_formula(row_num, 11, "=D"+str(row_num+1)+"-K"+str(row_num+1))
-                ws.write(row_num, 12, str(item_record.get('ItemTrackingNumber', 'N\A')))
+                ws.write(row_num, 12, str(item_record.get('ItemTrackingNumber', '0')))
                 order_num = order_num + 1
                 row_num = row_num + 1
 
@@ -385,19 +384,19 @@ class exportToSpreadsheetThread(QThread):
             ws.write(row_num, 11, "")
             ws.write(row_num, 12, "")
             row_num += 1
-            ws.write(row_num, 0, "")
-            ws.write(row_num, 1, "")
-            ws.write(row_num, 2, "")
+            ws.write(row_num, 0, "Totals")
+            ws.write(row_num, 1, "---")
+            ws.write(row_num, 2, "---")
             ws.write(row_num, 3, "=SUM(D%s:D%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 4, "=SUM(E%s:E%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 5, "")
+            ws.write(row_num, 5, "---")
             ws.write(row_num, 6, "=SUM(G%s:G%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 7, "=SUM(H%s:H%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 8, "=SUM(I%s:D%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 9, "=SUM(J%s:D%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 10, "=SUM(K%s:D%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 11, "=SUM(L%s:D%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 12, "")
+            ws.write(row_num, 12, "---")
 
 
             wb.close()
