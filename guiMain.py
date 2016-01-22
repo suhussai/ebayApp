@@ -398,10 +398,10 @@ class exportToSpreadsheetThread(QThread):
             ws.write(row_num, 5, "---")
             ws.write(row_num, 6, "=SUM(G%s:G%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 7, "=SUM(H%s:H%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 8, "=SUM(I%s:D%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 9, "=SUM(J%s:D%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 10, "=SUM(K%s:D%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 11, "=SUM(L%s:D%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 8, "=SUM(I%s:I%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 9, "=SUM(J%s:J%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 10, "=SUM(K%s:K%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 11, "=SUM(L%s:L%s)" %(str(starting_row+1), str(row_num-1)))
             ws.write(row_num, 12, "---")
 
 
