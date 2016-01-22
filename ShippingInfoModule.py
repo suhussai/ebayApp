@@ -7,7 +7,8 @@ from pathFunction import resource_path
 class ShippingInfoClass:
 
     def __init__(self, json_fileName="ShippingInfo.json",
-                 targetHtmlFile="My eBay.html"):
+                 targetHtmlFile="My eBay.html",
+                 user=""):
         """
         initializing function
         - requires the underlying json file record
@@ -16,12 +17,14 @@ class ShippingInfoClass:
         """
         self.json_fileName = resource_path(json_fileName)
         self.targetHtmlFile = targetHtmlFile
+        self.currentUser = user
+        self.ShippingInfo = {}
         try:
             fileHandler = open(self.json_fileName, 'r')
             self.ShippingInfo = json.load(fileHandler)
             fileHandler.close()
         except:
-            self.ShippingInfo = {
+            self.ShippingInfo[self.currentUser] = {
                 "update_file": {
                     "time_last_modified" : 0,
                     "file_size" : 0
@@ -29,9 +32,9 @@ class ShippingInfoClass:
             }
 
         self.last_files_time_last_modified = \
-                        self.ShippingInfo["update_file"]["time_last_modified"]
+                        self.ShippingInfo[self.currentUser]["update_file"]["time_last_modified"]
         self.last_files_size = \
-                        self.ShippingInfo["update_file"]["file_size"]
+                        self.ShippingInfo[self.currentUser]["update_file"]["file_size"]
 
     def refresh_record(self):
         """
@@ -42,7 +45,7 @@ class ShippingInfoClass:
             self.ShippingInfo = json.load(fileHandler)
             fileHandler.close()
         except:
-            self.ShippingInfo = {
+            self.ShippingInfo[self.currentUser] = {
                 "update_file": {
                     "time_last_modified" : 0,
                     "file_size" : 0
@@ -50,14 +53,14 @@ class ShippingInfoClass:
             }
 
     def get_shipping_info(self, key):
-        return self.ShippingInfo.get(key, "")
+        return self.ShippingInfo[self.currentUser].get(key, "")
 
     def add_entry(self, key, value):
-        self.ShippingInfo[key] = value
+        self.ShippingInfo[self.currentUser][key] = value
         self._update_json_file()
 
     def delete_entry(self, key):
-        if self.ShippingInfo.pop(key, None) is None:
+        if self.ShippingInfo[self.currentUser].pop(key, None) is None:
             # item not found (and not removed)
             # thus we dont need to update json file
             return
@@ -81,15 +84,15 @@ class ShippingInfoClass:
             file_time_modified = str(0)
 
         fileHandler = open(self.json_fileName, 'w') # overwrite file
-        self.ShippingInfo["update_file"]["file_size"] = file_size
+        self.ShippingInfo[self.currentUser]["update_file"]["file_size"] = file_size
 
-        self.ShippingInfo["update_file"]["time_last_modified"] = file_time_modified
+        self.ShippingInfo[self.currentUser]["update_file"]["time_last_modified"] = file_time_modified
 
 
         self.last_files_time_last_modified = \
-                        self.ShippingInfo["update_file"]["time_last_modified"]
+                        self.ShippingInfo[self.currentUser]["update_file"]["time_last_modified"]
         self.last_files_size = \
-                        self.ShippingInfo["update_file"]["file_size"]
+                        self.ShippingInfo[self.currentUser]["update_file"]["file_size"]
 
 
         json.dump(self.ShippingInfo, fileHandler, indent=2)
@@ -105,7 +108,7 @@ class ShippingInfoClass:
         and especially shipping label
         cost and item status.
         """
-        count_before = len(self.ShippingInfo)
+        count_before = len(self.ShippingInfo[self.currentUser])
         fileHandler = open(self.targetHtmlFile, "r")
         data = fileHandler.read()
         fileHandler.close()
@@ -126,13 +129,13 @@ class ShippingInfoClass:
                                   regexCompResult.span()[1]]
             )
             i = i + 9
-            self.ShippingInfo[tracking_number] = {"ShippingLabelCost"
+            self.ShippingInfo[self.currentUser][tracking_number] = {"ShippingLabelCost"
                                                   : shipping_label_cost,
                                                 "ShippingStatus":
                                                   shipping_status,
                                                 "BuyerName" :
                                                   name}
-        count_after = len(self.ShippingInfo)
+        count_after = len(self.ShippingInfo[self.currentUser])
         print("Count before: %d and after: %d, resulting in an increase of %d entries/entry." %(count_before, count_after, count_after-count_before))
         self._update_json_file()
 
@@ -151,7 +154,7 @@ class ShippingInfoClass:
         the function will check if we need to
         update, and will do so if necessary.
         """
-        result = self.ShippingInfo.get(key, None)
+        result = self.ShippingInfo[self.currentUser].get(key, None)
         if result is not None:
             # if key is found
             # return the result
@@ -166,7 +169,7 @@ class ShippingInfoClass:
             # ShippingInfo. If
             # still not present,
             # it is not created...
-            return self.ShippingInfo.get(key, None)
+            return self.ShippingInfo[self.currentUser].get(key, None)
 
     def _shouldWeUpdate(self):
         """
