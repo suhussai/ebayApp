@@ -30,6 +30,18 @@ class ShippingInfoClassTest(unittest.TestCase):
             self.sic.get_shipping_info("some keys") == ""
         )
 
+    def test_differentUsers(self):
+        self.sic_user1 = ShippingInfoClass(json_fileName, user="u1")
+        self.sic_user2 = ShippingInfoClass(json_fileName, user="u2")
+        self.sic_user1.add_entry("key1", "value1")
+
+        self.assertTrue(
+            self.sic_user1.get_entry("key1") == "value1"
+            and
+            self.sic_user2.get_entry("key1") == ""
+        )
+        self.sic_user1 = None
+        self.sic_user2 = None
 
 if __name__ == '__main__':
     unittest.main()
