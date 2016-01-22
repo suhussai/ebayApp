@@ -34,9 +34,20 @@ class ShippingInfoClass:
             }
 
         self.last_files_time_last_modified = \
-                        self.ShippingInfo[self.currentUser]["update_file"]["time_last_modified"]
+                        self.get_users_main_record()["update_file"]["time_last_modified"]
         self.last_files_size = \
-                        self.ShippingInfo[self.currentUser]["update_file"]["file_size"]
+                        self.get_users_main_record()["update_file"]["file_size"]
+
+    def get_users_main_record(self):
+        if self.ShippingInfo.get(self.currentUser, None) is None:
+            self.ShippingInfo[self.currentUser] = {
+                "update_file": {
+                    "time_last_modified" : 0,
+                    "file_size" : 0
+                }
+
+            }
+        return self.ShippingInfo[self.currentUser]
 
     def refresh_record(self):
         """
@@ -55,14 +66,14 @@ class ShippingInfoClass:
             }
 
     def get_shipping_info(self, key):
-        return self.ShippingInfo[self.currentUser].get(key, "")
+        return self.get_users_main_record().get(key, "")
 
     def add_entry(self, key, value):
-        self.ShippingInfo[self.currentUser][key] = value
+        self.get_users_main_record()[key] = value
         self._update_json_file()
 
     def delete_entry(self, key):
-        if self.ShippingInfo[self.currentUser].pop(key, None) is None:
+        if self.get_users_main_record().pop(key, None) is None:
             # item not found (and not removed)
             # thus we dont need to update json file
             return
@@ -86,15 +97,15 @@ class ShippingInfoClass:
             file_time_modified = str(0)
 
         fileHandler = open(self.json_fileName, 'w') # overwrite file
-        self.ShippingInfo[self.currentUser]["update_file"]["file_size"] = file_size
+        self.get_users_main_record()["update_file"]["file_size"] = file_size
 
-        self.ShippingInfo[self.currentUser]["update_file"]["time_last_modified"] = file_time_modified
+        self.get_users_main_record()["update_file"]["time_last_modified"] = file_time_modified
 
 
         self.last_files_time_last_modified = \
-                        self.ShippingInfo[self.currentUser]["update_file"]["time_last_modified"]
+                        self.get_users_main_record()["update_file"]["time_last_modified"]
         self.last_files_size = \
-                        self.ShippingInfo[self.currentUser]["update_file"]["file_size"]
+                        self.get_users_main_record()["update_file"]["file_size"]
 
 
         json.dump(self.ShippingInfo, fileHandler, indent=2)
@@ -110,7 +121,7 @@ class ShippingInfoClass:
         and especially shipping label
         cost and item status.
         """
-        count_before = len(self.ShippingInfo[self.currentUser])
+        count_before = len(self.get_users_main_record())
         fileHandler = open(self.targetHtmlFile, "r")
         data = fileHandler.read()
         fileHandler.close()
@@ -131,13 +142,13 @@ class ShippingInfoClass:
                                   regexCompResult.span()[1]]
             )
             i = i + 9
-            self.ShippingInfo[self.currentUser][tracking_number] = {"ShippingLabelCost"
+            self.get_users_main_record()[tracking_number] = {"ShippingLabelCost"
                                                   : shipping_label_cost,
                                                 "ShippingStatus":
                                                   shipping_status,
                                                 "BuyerName" :
                                                   name}
-        count_after = len(self.ShippingInfo[self.currentUser])
+        count_after = len(self.get_users_main_record())
         print("Count before: %d and after: %d, resulting in an increase of %d entries/entry." %(count_before, count_after, count_after-count_before))
         self._update_json_file()
 
@@ -156,7 +167,7 @@ class ShippingInfoClass:
         the function will check if we need to
         update, and will do so if necessary.
         """
-        result = self.ShippingInfo[self.currentUser].get(key, None)
+        result = self.get_users_main_record().get(key, None)
         if result is not None:
             # if key is found
             # return the result
@@ -171,7 +182,7 @@ class ShippingInfoClass:
             # ShippingInfo. If
             # still not present,
             # it is not created...
-            return self.ShippingInfo[self.currentUser].get(key, None)
+            return self.get_users_main_record().get(key, None)
 
     def _shouldWeUpdate(self):
         """
