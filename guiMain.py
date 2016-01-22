@@ -45,12 +45,27 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnAddNewItem.clicked.connect(self.addNewItem)
         self.btnDeleteItem.clicked.connect(self.deleteItem)
         self.btnRefreshRecords.clicked.connect(self.refreshRecords)
-        #self.btnExportToSpreadsheet.clicked.connect(self.exportToSpreadsheet)
+        self.btnExportToSpreadsheet.clicked.connect(self.exportToSpreadsheet)
         self.btns = [self.btnUpdateShipping, self.btnGetItemsSold,
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
-                     self.btnAddUser, self.btnRefreshRecords]
+                     self.btnAddUser, self.btnRefreshRecords,
+                     self.btnExportToSpreadsheet]
         #print(self.spinBoxDays.value())
 
+
+    def exportToSpreadsheet(self):
+        """
+        export item info records to spread sheet
+        """
+        self.setAllButtons(self.btnExportToSpreadsheet, False)
+        self.get_thread = exportToSpreadsheetThread(self.currentUser)
+        self.connect(self.get_thread,
+                     SIGNAL('finished_threading()'),
+                     self.finished_threading)
+        self.connect(self.get_thread,
+                     SIGNAL('errorHandlingForThreads(QString)'),
+                     self.errorHandlingForThreads)
+        self.get_thread.start()
 
     def refreshRecords(self):
         """
@@ -107,7 +122,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         the thread for the
         update shipping process
         """
-        self.setAllButtons(self.btnGetItemsSold, False)
+        self.setAllButtons(self.btnUpdateShipping, False)
         #days, ids = get_credentials_of_selected_user()
         self.get_thread = updateShippingInfoThread(self.targetHtmlFile)
         self.connect(self.get_thread,
@@ -126,6 +141,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         all_other_btns = [btn for btn in self.btns if btn is not exempted_button]
         for btn in all_other_btns:
+            print("btn " +str(btn)+ " is going to be " + str(state_of_all_other_buttons))
             btn.setEnabled(state_of_all_other_buttons)
 
     def finished_threading(self):
@@ -157,7 +173,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.get_thread.terminate()
 
         # release all buttons
-        self.setAllButtons(self.btnGetItemsSold, True)
+        self.setAllButtons(None, True)
 
         # display error in dialog
         # alloted for the thread
@@ -173,7 +189,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
             "Error:\n" + errorMessage
         )
         self.errorDialog.formatForGenericErrorDisplaying()
-
+        self.errorDialog.show()
     def getItemsSold(self):
         if self.currentUserCredentials is None:
             self.genDialogNoUserSelected = genDialog(
@@ -297,7 +313,99 @@ class updateShippingInfoThread(QThread):
             sic.update_ShippingInfo_and_file()
             self.emit(SIGNAL('finished_threading()'))
         except Exception as e:
+            print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
+
+
+
+class exportToSpreadsheetThread(QThread):
+    def __init__(self, currentUser=""):
+        QThread.__init__(self)
+        self.currentUser = currentUser
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        try:
+            #print("freed!!!!!")
+            #print(self.items)
+            # Step 2: write to excel file
+            iic = ItemInfoClass("ItemInfo.json", "Not needed")
+            self.items = sorted(iic.get_all_records().items())
+
+            wb = xlsxwriter.Workbook(self.currentUser + "_output.xlsx")
+            ws = wb.add_worksheet()
+            ws.write(3, 0, "Order #")
+            ws.write(3, 1, "Date")
+            ws.write(3, 2, "Name")
+            ws.write(3, 3, "Price of Item")
+            ws.write(3, 4, "Cost of Item")
+            ws.write(3, 5, "Shipping Status")
+            ws.write(3, 6, "Hassan")
+            ws.write(3, 7, "Shipping Cost")
+            ws.write(3, 8, "PayPal Fees")
+            ws.write(3, 9, "eBay Fees")
+            ws.write(3, 10, "Total Cost")
+            ws.write(3, 11, "Profit")
+            ws.write(3, 12, "ItemTrackingNumber")
+            order_num = 1
+            starting_row = 4 # this arbitrary, decides where we start filling
+            row_num = starting_row
+            # cells in the spreadsheet
+            for item in self.items:
+                transaction_date = item[0]
+                item_record = item[1]
+                ws.write(row_num, 0, order_num)
+                ws.write(row_num, 1, transaction_date)
+                ws.write(row_num, 2, item_record['ItemName'])
+                ws.write(row_num, 3, "="+item_record['ItemPrice'])
+                ws.write(row_num, 4, "="+item_record.get('cost_of_item', 'N/A'))
+                ws.write(row_num, 5, item_record.get("ShippingStatus",'N/A'))
+                ws.write(row_num, 6, "="+"7.00")
+                ws.write(row_num, 7, "="+item_record.get('ShippingLabelCost','N/A')[1:])
+                ws.write_formula(row_num, 8, "=0.3 + 0.029*E"+str(row_num+1))
+                ws.write_formula(row_num, 9, "=0.1*D"+str(row_num+1))
+                ws.write_formula(row_num, 10, "=E"+str(row_num+1)+"+I"+str(row_num+1)+"+G"+str(row_num+1)+"+H"+str(row_num+1)+"+J"+str(row_num+1))
+                ws.write_formula(row_num, 11, "=D"+str(row_num+1)+"-K"+str(row_num+1))
+                ws.write(row_num, 12, str(item_record.get('ItemTrackingNumber', 'N\A')))
+                order_num = order_num + 1
+                row_num = row_num + 1
+
+            ws.write(row_num, 0, "")
+            ws.write(row_num, 1, "")
+            ws.write(row_num, 2, "")
+            ws.write(row_num, 3, "")
+            ws.write(row_num, 4, "")
+            ws.write(row_num, 5, "")
+            ws.write(row_num, 6, "")
+            ws.write(row_num, 7, "")
+            ws.write(row_num, 8, "")
+            ws.write(row_num, 9, "")
+            ws.write(row_num, 10, "")
+            ws.write(row_num, 11, "")
+            ws.write(row_num, 12, "")
+            row_num += 1
+            ws.write(row_num, 0, "")
+            ws.write(row_num, 1, "")
+            ws.write(row_num, 2, "")
+            ws.write(row_num, 3, "=SUM(D%s:D%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 4, "=SUM(E%s:E%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 5, "")
+            ws.write(row_num, 6, "=SUM(G%s:G%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 7, "=SUM(H%s:H%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 8, "=SUM(I%s:D%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 9, "=SUM(J%s:D%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 10, "=SUM(K%s:D%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 11, "=SUM(L%s:D%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 12, "")
+
+
+            wb.close()
+            self.emit(SIGNAL('finished_threading()'))
+        except Exception as e:
+            print(e)
+            self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
+
 
 class refreshRecordsThread(QThread):
     def __init__(self):
@@ -312,6 +420,7 @@ class refreshRecordsThread(QThread):
             iic.refresh_records_held()
             self.emit(SIGNAL("finished_threading()"))
         except Exception as e:
+            print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class itemsSoldThread(QThread):
@@ -329,6 +438,7 @@ class itemsSoldThread(QThread):
             items = sorted(iic.get_new_items_sold(self.days).items())
             self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
         except Exception as e:
+            print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class getItemsSoldThread(QThread):
@@ -382,49 +492,6 @@ class getItemsSoldThread(QThread):
                 progressValue += (70)/self.days
                 self.emitNewProgressValue(progressValue)
 
-        #print("freed!!!!!")
-        #print(self.items)
-        # Step 2: write to excel file
-        wb = xlsxwriter.Workbook("output2.xlsx")
-        ws = wb.add_worksheet()
-        ws.write(3, 0, "Order #")
-        ws.write(3, 1, "Date")
-        ws.write(3, 2, "Name")
-        ws.write(3, 3, "Price of Item")
-        ws.write(3, 4, "Cost of Item")
-        ws.write(3, 5, "Shipping Status")
-        ws.write(3, 6, "Hassan")
-        ws.write(3, 7, "Shipping Cost")
-        ws.write(3, 8, "PayPal Fees")
-        ws.write(3, 9, "eBay Fees")
-        ws.write(3, 10, "Total Cost")
-        ws.write(3, 11, "Profit")
-        ws.write(3, 12, "ItemTrackingNumber")
-        order_num = 1
-        row_num = 4 # this arbitrary, decides where we start filling
-        # cells in the spreadsheet
-        for item in self.items:
-            transaction_date = item[0]
-            item_record = item[1]
-            ws.write(row_num, 0, order_num)
-            ws.write(row_num, 1, transaction_date)
-            ws.write(row_num, 2, item_record['ItemName'])
-            ws.write(row_num, 3, item_record['ItemPrice'])
-            ws.write(row_num, 4, item_record.get('cost_of_item', 'N/A'))
-            ws.write(row_num, 5, item_record.get("ShippingStatus",'N/A'))
-            ws.write(row_num, 6, "7.00")
-            ws.write(row_num, 7, item_record.get('ShippingLabelCost','N/A')[1:])
-            ws.write_formula(row_num, 8, "=0.3 + 0.029*E"+str(row_num+1))
-            ws.write_formula(row_num, 9, "=0.1*D"+str(row_num+1))
-            ws.write_formula(row_num, 10, "=E"+str(row_num+1)+"+I"+str(row_num+1)+"+G"+str(row_num+1)+"+H"+str(row_num+1)+"+J"+str(row_num+1))
-            ws.write_formula(row_num, 11, "=D"+str(row_num+1)+"-K"+str(row_num+1))
-            ws.write(row_num, 12, str(item_record.get('ItemTrackingNumber', 'N\A')))
-            order_num = order_num + 1
-            row_num = row_num + 1
-            progressValue += int(len(self.items)/25)
-            self.emitNewProgressValue(progressValue)
-
-        wb.close()
         progressValue = 100
         self.emitNewProgressValue(progressValue)
         self.emit(SIGNAL('finished_threading()'))
