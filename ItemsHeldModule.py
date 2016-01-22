@@ -16,7 +16,7 @@ class ItemsHeldClass:
             }
 
     def add_entry(self, long_name, short_name, cost_of_item):
-        self.ItemsHeld[self.currentUser][long_name.replace(" ","")] = {
+        self.get_users_main_record()[long_name.replace(" ","")] = {
             'long_name': long_name,
             'short_name': short_name,
             'cost_of_item': cost_of_item
@@ -36,19 +36,26 @@ class ItemsHeldClass:
                 self.currentUser: {}
             }
 
+    def get_users_main_record(self):
+        if self.ItemsHeld.get(self.currentUser, None) is None:
+            self.ItemsHeld[self.currentUser] = {}
+        return self.ItemsHeld[self.currentUser]
+
+    def get_records(self):
+        return self.get_users_main_record()
 
     def delete_entry(self, long_name):
-        self.ItemsHeld[self.currentUser].pop(long_name.replace(" ", ""), None)
+        self.get_users_main_record().pop(long_name.replace(" ", ""), None)
 
     def get_short_name(self, long_name):
-        value = self.ItemsHeld[self.currentUser].get(long_name.replace(" ", ""), None)
+        value = self.get_users_main_record().get(long_name.replace(" ", ""), None)
         if value is not None:
             return value.get("short_name", "")
         else:
             return ""
 
     def get_cost_of_item(self, long_name):
-        value = self.ItemsHeld[self.currentUser].get(long_name.replace(" ", ""), None)
+        value = self.get_users_main_record().get(long_name.replace(" ", ""), None)
         if value is not None:
             return value.get("cost_of_item", "")
         else:
@@ -71,7 +78,7 @@ class ItemsHeldClass:
                 long_name = values[0]
                 short_name = values[1]
                 cost_of_item = values[2]
-                self.ItemsHeld[self.currentUser][long_name.replace(" ","")] = {
+                self.get_users_main_record()[long_name.replace(" ","")] = {
                     'long_name': long_name,
                     'short_name': short_name,
                     'cost_of_item': cost_of_item
