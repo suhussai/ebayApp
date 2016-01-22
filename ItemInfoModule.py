@@ -19,7 +19,7 @@ class ItemInfoClass:
         self.json_fileName_ihc = resource_path(json_fileName_ihc)
         self.json_fileName_sic = resource_path(json_fileName_sic)
         self.shippingHTMLFile = shippingHTMLFile
-        self.user = user
+        self.currentUser = user
         self._ItemsSold = None
         if ids is None:
             print("No ids")
@@ -32,7 +32,7 @@ class ItemInfoClass:
             fileHandler.close()
         except:
             self._ItemsSold = {
-                self.user:{}
+                self.currentUser:{}
             }
 
         self.recordedItems = {} # holds recorded items
@@ -40,20 +40,25 @@ class ItemInfoClass:
         self.requestedItemsSold = {} # holds the items that are
                                      # found in the last 'days'
 
+    def get_users_main_record(self):
+        if self._ItemsSold.get(self.currentUser, None) is None:
+            self._ItemsSold[self.currentUser] = {}
+        return self._ItemsSold[self.currentUser]
+
     def get_all_records(self):
         self.requestedItems = None
         return self._format_items_sorted_by_date()
 
 
     def get_entry(self, orderID):
-        return self._ItemsSold[self.user].get(orderID, "")
+        return self.get_users_main_record().get(orderID, "")
 
     def add_entry(self, orderID, itemInfo_dict):
-        self._ItemsSold[self.user][orderID] = itemInfo_dict
+        self.get_users_main_record()[orderID] = itemInfo_dict
         self._update_json_file()
 
     def delete_entry(self, orderID):
-        if self._ItemsSold[self.user].pop(orderID, None) is None:
+        if self.get_users_main_record().pop(orderID, None) is None:
             # item not found (and not removed)
             # thus we dont need to update json file
             return
@@ -103,12 +108,12 @@ class ItemInfoClass:
 
             transactionsDict = soldListDict['OrderTransactionArray']
             transactions = transactionsDict['OrderTransaction']
-            recorded_keys = self._ItemsSold[self.user].keys()
+            recorded_keys = self.get_users_main_record().keys()
             for transaction in transactions:
                 orderId = transaction['Transaction']['OrderLineItemID']
                 # total new items sold = recordedItems + unrecordedItems
                 if orderId in recorded_keys:
-                    self.recordedItems[orderId] = self._ItemsSold[self.user][orderId]
+                    self.recordedItems[orderId] = self.get_users_main_record()[orderId]
                 else:
                     self.unrecordedItems[orderId] = {}
 
@@ -184,7 +189,7 @@ class ItemInfoClass:
         each record should have.
         """
         orderIDs = recordsWithoutShippingInfo.keys()
-        si = ShippingInfoClass(self.json_fileName_sic, self.shippingHTMLFile)
+        si = ShippingInfoClass(self.json_fileName_sic, self.shippingHTMLFile, user=self.currentUser)
 
         for orderID in orderIDs:
             tracking_numbers = recordsWithoutShippingInfo[orderID].get('ItemTrackingNumber', [])
@@ -231,8 +236,8 @@ class ItemInfoClass:
         in case we update name or shipping
         info later
         """
-        self._append_shipping_info_to_records(self._ItemsSold[self.user])
-        self._append_name_info_to_records(self._ItemsSold[self.user])
+        self._append_shipping_info_to_records(self.get_users_main_record())
+        self._append_name_info_to_records(self.get_users_main_record())
         self._update_json_file()
 
     def get_new_items_sold(self, days):
@@ -262,7 +267,7 @@ class ItemInfoClass:
         self._append_name_info_to_records(self.unrecordedItems)
         self._append_name_info_to_records(self.recordedItems)
         # add new unrecorded items to the record
-        self._ItemsSold[self.user].update(self.unrecordedItems)
+        self.get_users_main_record().update(self.unrecordedItems)
         self._update_json_file()
         # requestedItems will be all the items
         # that are found to be sold in the
@@ -287,8 +292,9 @@ class ItemInfoClass:
 
         Return not required
         """
-        ihc = ItemsHeldClass(self.json_fileName_ihc)
-        itemsHeld = ihc.ItemsHeld
+        ihc = ItemsHeldClass(self.json_fileName_ihc, user=self.currentUser)
+        itemsHeld = ihc.get_records()
+        print("before loop")
         for key, value in records.iteritems():
             # convert long name to short name
             # if available
@@ -297,7 +303,7 @@ class ItemInfoClass:
             if itemsHeld.get(long_name, None) is not None:
                 value['ItemName'] = itemsHeld[long_name].get('short_name', value['ItemName'])
                 value['cost_of_item'] = itemsHeld[long_name].get('cost_of_item')
-
+        print("finishin updating names")
 
     def _format_items_sorted_by_date(self):
         """
@@ -310,7 +316,7 @@ class ItemInfoClass:
         if self.requestedItemsSold:
             working_dict = self.requestedItemsSold
         else:
-            working_dict = self._ItemsSold[self.user]
+            working_dict = self.get_users_main_record()
 
         for orderID, item_record in working_dict.iteritems():
             if item_record.get('ItemDate', False):
