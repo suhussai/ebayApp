@@ -6,13 +6,19 @@ from pathFunction import resource_path
 
 class ItemInfoClass:
 
-    def __init__(self, json_fileName="ItemInfo.json", ids=None):
+    def __init__(self, json_fileName_iic="ItemInfo.json", ids=None,
+                 json_fileName_sic="ShippingInfo.json", shippingHTMLFile="My eBay.html",
+                 json_fileName_ihc="ItemsHeld.json"
+    ):
         """
         - initializes ItemInfoClass
         - requires underlying json file name and
         ids required for access ebay API
         """
-        self.json_fileName = resource_path(json_fileName)
+        self.json_fileName_iic = resource_path(json_fileName_iic)
+        self.json_fileName_ihc = resource_path(json_fileName_ihc)
+        self.json_fileName_sic = resource_path(json_fileName_sic)
+        self.shippingHTMLFile = shippingHTMLFile
         self._ItemsSold = None
         if ids is None:
             print("No ids")
@@ -20,13 +26,12 @@ class ItemInfoClass:
         self.api = Trading(appid=ids[0], devid=ids[1], certid=ids[2],
                            token=ids[3], config_file=None)
         try:
-            fileHandler = open(self.json_fileName, 'r')
+            fileHandler = open(self.json_fileName_iic, 'r')
             self._ItemsSold = json.load(fileHandler)
             fileHandler.close()
         except:
             self._ItemsSold = {}
 
-        self.si = ShippingInfoClass('ShippingInfo.json', 'My eBay.html')
         self.recordedItems = {} # holds recorded items
         self.unrecordedItems = {} # holds unrecorded items
         self.requestedItemsSold = {} # holds the items that are
@@ -52,7 +57,7 @@ class ItemInfoClass:
         updates the underlying json file with the
         records currently held in the _ItemsSold variable.
         """
-        fileHandler = open(self.json_fileName, 'w')
+        fileHandler = open(self.json_fileName_iic, 'w')
         json.dump(self._ItemsSold, fileHandler, indent=2)
         fileHandler.close()
 
@@ -171,12 +176,14 @@ class ItemInfoClass:
         each record should have.
         """
         orderIDs = recordsWithoutShippingInfo.keys()
+        si = ShippingInfoClass(self.json_fileName_sic, self.shippingHTMLFile)
+
         for orderID in orderIDs:
             tracking_numbers = recordsWithoutShippingInfo[orderID].get('ItemTrackingNumber', [])
             #print(tracking_numbers)
             tracking_numbers_dict = {}
             for tracking_number in tracking_numbers:
-                info = self.si.getLabelInfo(tracking_number)
+                info = si.getLabelInfo(tracking_number)
                 if info is not None and "Void" not in info['ShippingStatus']:
                     tracking_numbers_dict[float(info['ShippingLabelCost'][1:])]={
                         'ShippingLabelCost': info['ShippingLabelCost'],
@@ -272,7 +279,7 @@ class ItemInfoClass:
 
         Return not required
         """
-        ihc = ItemsHeldClass("ItemsHeld.json")
+        ihc = ItemsHeldClass(self.json_fileName_ihc)
         itemsHeld = ihc.ItemsHeld
 
         for key, value in records.iteritems():
