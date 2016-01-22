@@ -43,3 +43,11 @@ class genDialog(QtGui.QDialog, genericDialog.Ui_Dialog):
         self.enableOKButton()
         self.disableProgressBar()
 
+    def formatForGenericActionNotFinished(self):
+        self.disableOKButton()
+        self.disableProgressBar()
+        self.show()
+    def formatForGenericActionFinished(self):
+        self.setText("Finished!")
+        self.enableOKButton()
+        self.disableProgressBar()

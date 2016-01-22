@@ -57,6 +57,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         export item info records to spread sheet
         """
         self.setAllButtons(self.btnExportToSpreadsheet, False)
+        self.genDialog = genDialog("Exporting to Spreadsheet...")
+        self.genDialog.formatForGenericActionNotFinished()
+
         self.get_thread = exportToSpreadsheetThread(self.currentUser)
         self.connect(self.get_thread,
                      SIGNAL('finished_threading()'),
@@ -72,6 +75,9 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         self.setAllButtons(self.btnRefreshRecords, False)
         print(self.currentUser)
+        self.genDialog = genDialog("Refreshing Records...")
+        self.genDialog.formatForGenericActionNotFinished()
+
         self.get_thread = refreshRecordsThread(self.currentUser)
         self.connect(self.get_thread,
                      SIGNAL('finished_threading()'),
@@ -126,6 +132,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         self.setAllButtons(self.btnUpdateShipping, False)
         #days, ids = get_credentials_of_selected_user()
+        self.genDialog = genDialog("Updating Shipping Info...")
+        self.genDialog.formatForGenericActionNotFinished()
         self.get_thread = updateShippingInfoThread(self.targetHtmlFile, user=self.currentUser)
         self.connect(self.get_thread,
                      SIGNAL('finished_threading()'),
@@ -147,12 +155,13 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def finished_threading(self):
         """
-        to be run when the getting new
-        update shipping info process is completed
+        to be run when the a threading
+        process is completed
         """
         self.setAllButtons(None, True) # turn on all buttons
-        self.get_thread.terminate()
+        self.get_thread.terminate() # terminate thread
         if self.genDialog:
+            self.genDialog.formatForGenericActionFinished()
             self.genDialog.enableOKButton()
 
     def get_credentials_of_selected_user(self):
