@@ -3,17 +3,20 @@ from pathFunction import resource_path
 
 class ItemsHeldClass:
 
-    def __init__(self, json_fileName):
+    def __init__(self, json_fileName, user=""):
         self.json_fileName = resource_path(json_fileName)
+        self.currentUser = user
         try:
             fileHandler = open(self.json_fileName, 'r')
             self.ItemsHeld = json.load(fileHandler)
             fileHandler.close()
         except:
-            self.ItemsHeld = {}
+            self.ItemsHeld = {
+                self.currentUser: {}
+            }
 
     def add_entry(self, long_name, short_name, cost_of_item):
-        self.ItemsHeld[long_name.replace(" ","")] = {
+        self.ItemsHeld[self.currentUser][long_name.replace(" ","")] = {
             'long_name': long_name,
             'short_name': short_name,
             'cost_of_item': cost_of_item
@@ -29,21 +32,23 @@ class ItemsHeldClass:
             self.ItemsHeld = json.load(fileHandler)
             fileHandler.close()
         except:
-            self.ItemsHeld = {}
+            self.ItemsHeld = {
+                self.currentUser: {}
+            }
 
 
     def delete_entry(self, long_name):
-        self.ItemsHeld.pop(long_name.replace(" ", ""), None)
+        self.ItemsHeld[self.currentUser].pop(long_name.replace(" ", ""), None)
 
     def get_short_name(self, long_name):
-        value = self.ItemsHeld.get(long_name.replace(" ", ""), None)
+        value = self.ItemsHeld[self.currentUser].get(long_name.replace(" ", ""), None)
         if value is not None:
             return value.get("short_name", "")
         else:
             return ""
 
     def get_cost_of_item(self, long_name):
-        value = self.ItemsHeld.get(long_name.replace(" ", ""), None)
+        value = self.ItemsHeld[self.currentUser].get(long_name.replace(" ", ""), None)
         if value is not None:
             return value.get("cost_of_item", "")
         else:
@@ -66,7 +71,7 @@ class ItemsHeldClass:
                 long_name = values[0]
                 short_name = values[1]
                 cost_of_item = values[2]
-                self.ItemsHeld[long_name.replace(" ","")] = {
+                self.ItemsHeld[self.currentUser][long_name.replace(" ","")] = {
                     'long_name': long_name,
                     'short_name': short_name,
                     'cost_of_item': cost_of_item
