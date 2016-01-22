@@ -24,7 +24,6 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.users = None
         self.currentUser = ""
         self.currentUserCredentials = None
-        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json")
         self.display_items_held_tree()
 
         self.users_file = resource_path("users.json")
@@ -72,7 +71,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         - refresh item info records
         """
         self.setAllButtons(self.btnRefreshRecords, False)
-        self.get_thread = refreshRecordsThread()
+        print(self.currentUser)
+        self.get_thread = refreshRecordsThread(self.currentUser)
         self.connect(self.get_thread,
                      SIGNAL('finished_threading()'),
                      self.finished_threading)
@@ -86,6 +86,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         delete item held in items held records
         """
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser)
         records_to_be_deleted = self.treeItemsHeld.selectedItems()
         for record in records_to_be_deleted:
             # column zero is long_name
@@ -103,6 +104,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         - cost of item from self.spinCostOfItem.value()
         Note: quick process, separate thread not required
         """
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser)
         long_name = str(self.lineLongName.text())
         short_name = str(self.lineShortName.text())
         cost_of_item = str(self.doubleSpinCostOfItem.value())
@@ -124,7 +126,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         self.setAllButtons(self.btnUpdateShipping, False)
         #days, ids = get_credentials_of_selected_user()
-        self.get_thread = updateShippingInfoThread(self.targetHtmlFile)
+        self.get_thread = updateShippingInfoThread(self.targetHtmlFile, user=self.currentUser)
         self.connect(self.get_thread,
                      SIGNAL('finished_threading()'),
                      self.finished_threading)
@@ -202,7 +204,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setAllButtons(self.btnGetItemsSold, False)
         ids, days = self.get_credentials_of_selected_user()
 
-        self.get_thread = getItemsSoldThread(days, ids, "FIXME")
+        self.get_thread = getItemsSoldThread(days, ids, "FIXME", user=self.currentUser)
         #self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
         self.connect(self.get_thread,
                      SIGNAL('finished_threading()'),
@@ -227,6 +229,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         print(self.listUsers.selectedItems())
         self.currentUser = str(selected_user.text())
         self.currentUserCredentials = self.users[self.currentUser]
+        self.display_items_held_tree()
         print(self.currentUser)
         print(self.currentUserCredentials)
 
@@ -277,8 +280,10 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         fileHandler.close()
 
     def display_items_held_tree(self):
+        print("Clearing treee ??")
         self.treeItemsHeld.clear()
-        item_records = self.itemsHeldClassHandler.ItemsHeld.values()
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser)
+        item_records = self.itemsHeldClassHandler.get_records().values()
         item_records.sort()
         # item_records is a list of dicts containing
         # long_name, short_name and cost_of_item
@@ -292,10 +297,10 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
                                   formatted_records)
 
 class updateShippingInfoThread(QThread):
-    def __init__(self,targetHtmlFile):
+    def __init__(self,targetHtmlFile, user=""):
         QThread.__init__(self)
         self.targetHtmlFile = targetHtmlFile
-
+        self.currentUser = user
     def __del__(self):
         self.wait()
 
@@ -308,7 +313,7 @@ class updateShippingInfoThread(QThread):
         - destroy thread
         """
         try:
-            sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile)
+            sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile, user=self.currentUser)
             sic.update_ShippingInfo_and_file()
             self.emit(SIGNAL('finished_threading()'))
         except Exception as e:
@@ -329,7 +334,8 @@ class exportToSpreadsheetThread(QThread):
             #print("freed!!!!!")
             #print(self.items)
             # Step 2: write to excel file
-            iic = ItemInfoClass("ItemInfo.json", "Not needed")
+            iic = ItemInfoClass("ItemInfo.json", ids="Not needed",
+                                user=self.currentUser)
             self.items = sorted(iic.get_all_records().items())
 
             wb = xlsxwriter.Workbook(self.currentUser + "_output.xlsx")
@@ -407,33 +413,36 @@ class exportToSpreadsheetThread(QThread):
 
 
 class refreshRecordsThread(QThread):
-    def __init__(self):
+    def __init__(self, currentUser):
         QThread.__init__(self)
-
+        self.currentUser = currentUser
     def __del__(self):
         self.wait()
 
     def run(self):
         try:
-            iic = ItemInfoClass("ItemInfo.json", "Not None")
+            iic = ItemInfoClass("ItemInfo.json", ids="Not None",
+                                user=self.currentUser)
             iic.refresh_records_held()
             self.emit(SIGNAL("finished_threading()"))
         except Exception as e:
+            print("wtf")
             print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class itemsSoldThread(QThread):
-    def __init__(self, days, ids):
+    def __init__(self, days, ids, user=""):
         QThread.__init__(self)
         self.days = days
         self.ids = ids
-
+        self.currentUser = user
     def __del__(self):
         self.wait()
 
     def run(self):
         try:
-            iic = ItemInfoClass("ItemInfo.json",  self.ids)
+            iic = ItemInfoClass("ItemInfo.json",  ids=self.ids,
+                                user=self.currentUser)
             items = sorted(iic.get_new_items_sold(self.days).items())
             self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
         except Exception as e:
@@ -441,12 +450,12 @@ class itemsSoldThread(QThread):
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class getItemsSoldThread(QThread):
-    def __init__(self, days, ids, spreadsheetName):
+    def __init__(self, days, ids, spreadsheetName, user=""):
         QThread.__init__(self)
         self.days = days
         self.ids = ids
         self.spreadsheetName = spreadsheetName
-
+        self.currentUser = user
     def __del__(self):
         self.wait()
 
@@ -454,11 +463,12 @@ class getItemsSoldThread(QThread):
         if progressValue <= 100:
             self.emit(SIGNAL("genDialog.setProgressValue(QString)"), str(progressValue))
 
-    def errorHandlingForItemsSold(self, errorMessage):
-        self.emit(SIGNAL('errorHandlingForItemsSold(QString)'), errorMessage)
+    def errorHandlingForThreads(self, errorMessage):
+        self.emit(SIGNAL('errorHandlingForThreads(QString)'), errorMessage)
         self.new_items_sold_thread.terminate()
 
     def update_items(self, items):
+        print("got items")
         self.items = items
         self.new_items_sold_thread.terminate()
 
@@ -471,13 +481,13 @@ class getItemsSoldThread(QThread):
         - destroy thread
         """
 
-        self.new_items_sold_thread = itemsSoldThread(self.days, self.ids)
+        self.new_items_sold_thread = itemsSoldThread(self.days, self.ids, user=self.currentUser)
         self.connect(self.new_items_sold_thread,
                      SIGNAL('update_items(PyQt_PyObject)'),
                      self.update_items)
         self.connect(self.new_items_sold_thread,
-                     SIGNAL('errorHandlingForItemsSold(QString)'),
-                     self.errorHandlingForItemsSold)
+                     SIGNAL('errorHandlingForThreads(QString)'),
+                     self.errorHandlingForThreads)
         self.new_items_sold_thread.start()
         print("thread started")
         #empty = "empty"
