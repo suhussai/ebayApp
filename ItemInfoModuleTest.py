@@ -54,5 +54,21 @@ class ShippingInfoClassTest(unittest.TestCase):
         self.sic = None
         os.remove(json_fileName_sic)
 
+    def test_differentUsers(self):
+        self.iic_user1 = ItemInfoClass(json_fileName_iic,
+                                       ids="Not None",user="u1",
+                                       json_fileName_sic=json_fileName_sic)
+        self.iic_user2 = ItemInfoClass(json_fileName_iic,
+                                    ids="Not None",user="u2",
+                                    json_fileName_sic=json_fileName_sic)
+        self.iic_user1.add_entry("key1", "value1")
+        self.assertTrue(
+            self.iic_user1.get_entry("key1") == "value1"
+            and
+            self.iic_user2.get_entry("key1") == ""
+        )
+        self.iic_user1 = None
+        self.iic_user2 = None
+
 if __name__ == '__main__':
     unittest.main()
