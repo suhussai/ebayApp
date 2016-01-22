@@ -286,16 +286,14 @@ class ItemInfoClass:
         """
         ihc = ItemsHeldClass(self.json_fileName_ihc)
         itemsHeld = ihc.ItemsHeld
-
         for key, value in records.iteritems():
             # convert long name to short name
             # if available
             long_name = value['ItemName'].replace(" ","")
+            value['cost_of_item'] = '0'
             if itemsHeld.get(long_name, None) is not None:
                 value['ItemName'] = itemsHeld[long_name].get('short_name', value['ItemName'])
                 value['cost_of_item'] = itemsHeld[long_name].get('cost_of_item')
-            elif value.get('cost_of_item', None) is None:
-                value['cost_of_item'] = 'N/A'
 
 
     def _format_items_sorted_by_date(self):
