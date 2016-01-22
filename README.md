@@ -13,3 +13,14 @@ Last Updated Jan. 16 2016
 - Uses eBaySDK from timotheus/ebaysdk-python
 - Module BeautifulSoup4 
 - Used https://rtyley.github.io/bfg-repo-cleaner/ to remove sensitive test user info
+
+
+## Build Instructions
+### Ubuntu
+- TODO
+-
+
+### Windows
+- TODO
+- 
+
