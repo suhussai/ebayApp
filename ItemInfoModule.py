@@ -1,6 +1,7 @@
 from ebaysdk.trading import Connection as Trading
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
+from requests.exceptions import Timeout
 import json, re
 from pathFunction import resource_path
 
@@ -76,6 +77,25 @@ class ItemInfoClass:
         json.dump(self._ItemsSold, fileHandler, indent=2)
         fileHandler.close()
 
+    def _execute_api_request(self, request_type, args):
+        """
+        - wrapper function for api request
+        - handles issues with timeouts
+        - retries until successful
+        """
+        unsuccessful = False
+        successful = True
+        attempt = unsuccessful
+        response = ""
+        while (attempt is unsuccessful):
+            try:
+                response = self.api.execute(request_type, args)
+                attempt = successful
+            except Timeout: # a requests exception
+                # solution is to retry
+                print("caught time out, trying again.")
+                attempt = unsuccessful
+        return response
 
     def _get_new_items_orderID(self):
         """
@@ -87,7 +107,7 @@ class ItemInfoClass:
         pageNumber = 1
 
         while HasMorePages:
-            response = self.api.execute('GetMyeBaySelling',
+            response = self._execute_api_request('GetMyeBaySelling',
                                         {
                                             'SoldList':
                                             {
@@ -138,7 +158,7 @@ class ItemInfoClass:
         while (HasMoreOrders):
             pageNumber = pageNumber + 1
             #print("Reading page " + str(pageNumber))
-            response = self.api.execute('GetOrders',
+            response = self._execute_api_request('GetOrders',
                                    {'OrderIDArray': {'OrderID': self.unrecordedItems.keys()},
                                     'NumberOfDays': self.days,
                                     'Pagination' : {'EntriesPerPage': 100, 'PageNumber': pageNumber}}
