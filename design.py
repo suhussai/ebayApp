@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Sat Jan 23 21:20:02 2016
+# Created: Sun Jan 24 12:34:50 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -169,6 +169,9 @@ class Ui_MainWindow(object):
         self.btnDeleteItem = QtGui.QPushButton(self.tab_2)
         self.btnDeleteItem.setObjectName(_fromUtf8("btnDeleteItem"))
         self.verticalLayout_4.addWidget(self.btnDeleteItem)
+        self.btnUpdateItemsHeldFromFile = QtGui.QPushButton(self.tab_2)
+        self.btnUpdateItemsHeldFromFile.setObjectName(_fromUtf8("btnUpdateItemsHeldFromFile"))
+        self.verticalLayout_4.addWidget(self.btnUpdateItemsHeldFromFile)
         self.horizontalLayout_3.addLayout(self.verticalLayout_4)
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
         self.horizontalLayout.addWidget(self.tabWidget)
@@ -188,7 +191,7 @@ class Ui_MainWindow(object):
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_2)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -217,6 +220,7 @@ class Ui_MainWindow(object):
         self.label_9.setText(_translate("MainWindow", "Cost of Item", None))
         self.btnAddNewItem.setText(_translate("MainWindow", "Add New Item", None))
         self.btnDeleteItem.setText(_translate("MainWindow", "Delete Item", None))
+        self.btnUpdateItemsHeldFromFile.setText(_translate("MainWindow", "Update Items Held From File", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Item Management", None))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))
         self.toolBar_2.setWindowTitle(_translate("MainWindow", "toolBar_2", None))

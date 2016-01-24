@@ -30,6 +30,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
             mpass = ""
 
         self.users_file = resource_path("users.json", meipass=mpass)
+        self.items_held_update_file = "items.txt"
         self.targetHtmlFile = "My eBay.html"
         try: # in case it doesnt exist
             fileHandler = open(self.users_file, 'r')
@@ -48,6 +49,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btnDeleteItem.clicked.connect(self.deleteItem)
         self.btnRefreshRecords.clicked.connect(self.refreshRecords)
         self.btnExportToSpreadsheet.clicked.connect(self.exportToSpreadsheet)
+        self.btnUpdateItemsHeldFromFile.clicked.connect(self.updateItemsHeldFromFile)
         self.btns = [self.btnUpdateShipping, self.btnGetItemsSold,
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
                      self.btnAddUser, self.btnRefreshRecords,
@@ -58,6 +60,22 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.statusBar().addWidget(self.userLabel)
         #print(self.spinBoxDays.value())
 
+    def updateItemsHeldFromFile(self):
+        self.setAllButtons(self.btnUpdateItemsHeldFromFile, False)
+        self.genDialog = genDialog("Updating from file...")
+        self.genDialog.formatForGenericActionNotFinished()
+
+        self.get_thread = updateItemsHeldFromFileThread(fileName=self.items_held_update_file, user=self.currentUser)
+        self.connect(self.get_thread,
+                     SIGNAL('finished_threading()'),
+                     self.finished_threading)
+        self.connect(self.get_thread,
+                     SIGNAL('display_items_held_tree()'),
+                     self.display_items_held_tree)
+        self.connect(self.get_thread,
+                     SIGNAL('errorHandlingForThreads(QString)'),
+                     self.errorHandlingForThreads)
+        self.get_thread.start()
 
     def exportToSpreadsheet(self):
         """
@@ -494,7 +512,30 @@ class refreshRecordsThread(QThread):
             iic.refresh_records_held()
             self.emit(SIGNAL("finished_threading()"))
         except Exception as e:
-            print("wtf")
+            print(e)
+            self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
+
+class updateItemsHeldFromFileThread(QThread):
+    def __init__(self, fileName="items.txt", user=""):
+        QThread.__init__(self)
+        self.currentUser = user
+        self.fileName = fileName
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        try:
+            try:
+                mpass = sys._MEIPASS
+            except:
+                mpass = ""
+
+            ihc = ItemsHeldClass("ItemsHeld.json", user=self.currentUser,
+                                 meipass=mpass)
+            ihc.update_ItemsHeld_and_file(self.fileName)
+            self.emit(SIGNAL("display_items_held_tree()"))
+            self.emit(SIGNAL("finished_threading()"))
+        except Exception as e:
             print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 

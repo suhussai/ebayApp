@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -330,6 +330,13 @@
            <widget class="QPushButton" name="btnDeleteItem">
             <property name="text">
              <string>Delete Item</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnUpdateItemsHeldFromFile">
+            <property name="text">
+             <string>Update Items Held From File</string>
             </property>
            </widget>
           </item>
