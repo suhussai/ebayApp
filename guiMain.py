@@ -12,23 +12,7 @@ from ItemInfoModule import ItemInfoClass
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
 from dialogModule import genDialog
-
-def resource_path(relative_path):
-    """
-    function from:
-    http://stackoverflow.com/questions/7674790/bundling-data-files-with-pyinstaller-onefile?lq=1
-    User: max
-    """
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-        print(sys._MEIPASS)
-    except Exception:
-        base_path = os.path.abspath(".")
-        print("not found")
-    return os.path.join(base_path, relative_path)
-
+from pathFunction import resource_path
 
 class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -40,8 +24,12 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.currentUser = ""
         self.currentUserCredentials = None
         self.display_items_held_tree()
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
 
-        self.users_file = resource_path("users.json")
+        self.users_file = resource_path("users.json", meipass=mpass)
         self.targetHtmlFile = "My eBay.html"
         try: # in case it doesnt exist
             fileHandler = open(self.users_file, 'r')
@@ -111,7 +99,11 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         delete item held in items held records
         """
-        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser)
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser, meipass=mpass)
         records_to_be_deleted = self.treeItemsHeld.selectedItems()
         for record in records_to_be_deleted:
             # column zero is long_name
@@ -129,7 +121,12 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         - cost of item from self.spinCostOfItem.value()
         Note: quick process, separate thread not required
         """
-        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser)
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
+
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser, meipass=mpass)
         long_name = str(self.lineLongName.text())
         short_name = str(self.lineShortName.text())
         cost_of_item = str(self.doubleSpinCostOfItem.value())
@@ -311,7 +308,11 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def display_items_held_tree(self):
         self.treeItemsHeld.clear()
-        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser)
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
+        self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser, meipass=mpass)
         item_records = self.itemsHeldClassHandler.get_records().values()
         item_records.sort()
         # item_records is a list of dicts containing
@@ -342,7 +343,12 @@ class updateShippingInfoThread(QThread):
         - destroy thread
         """
         try:
-            sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile, user=self.currentUser)
+            try:
+                mpass = sys._MEIPASS
+            except:
+                mpass = ""
+
+            sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile, user=self.currentUser, meipass=mpass)
             sic.update_ShippingInfo_and_file()
             self.emit(SIGNAL('finished_threading()'))
         except Exception as e:
@@ -363,8 +369,13 @@ class exportToSpreadsheetThread(QThread):
             #print("freed!!!!!")
             #print(self.items)
             # Step 2: write to excel file
+            try:
+                mpass = sys._MEIPASS
+            except:
+                mpass = ""
+                
             iic = ItemInfoClass("ItemInfo.json", ids="Not needed",
-                                user=self.currentUser)
+                                user=self.currentUser, meipass=mpass)
             self.items = sorted(iic.get_all_records().items())
 
             wb = xlsxwriter.Workbook(self.currentUser + "_output.xlsx")
@@ -473,8 +484,13 @@ class refreshRecordsThread(QThread):
 
     def run(self):
         try:
+            try:
+                mpass = sys._MEIPASS
+            except:
+                mpass = ""
+
             iic = ItemInfoClass("ItemInfo.json", ids="Not None",
-                                user=self.currentUser)
+                                user=self.currentUser, meipass=mpass)
             iic.refresh_records_held()
             self.emit(SIGNAL("finished_threading()"))
         except Exception as e:
@@ -493,8 +509,13 @@ class itemsSoldThread(QThread):
 
     def run(self):
         try:
+            try:
+                mpass = sys._MEIPASS
+            except:
+                mpass = ""
+
             iic = ItemInfoClass("ItemInfo.json",  ids=self.ids,
-                                user=self.currentUser)
+                                user=self.currentUser, meipass=mpass)
             items = sorted(iic.get_new_items_sold(self.days).items())
             self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
         except Exception as e:

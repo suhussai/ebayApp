@@ -3,38 +3,23 @@ from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
 from requests.exceptions import Timeout
 import json, re, os
-#from pathFunction import resource_path
-
-def resource_path(relative_path):
-    """
-    function from:
-    http://stackoverflow.com/questions/7674790/bundling-data-files-with-pyinstaller-onefile?lq=1
-    User: max
-    """
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
+from pathFunction import resource_path
 
 class ItemInfoClass:
 
     def __init__(self, json_fileName_iic="ItemInfo.json", ids=None,
                  json_fileName_sic="ShippingInfo.json", shippingHTMLFile="My eBay.html",
-                 json_fileName_ihc="ItemsHeld.json", user=""
+                 json_fileName_ihc="ItemsHeld.json", user="", meipass=""
     ):
         """
         - initializes ItemInfoClass
         - requires underlying json file name and
         ids required for access ebay API
         """
-        self.json_fileName_iic = resource_path(json_fileName_iic)
-        self.json_fileName_ihc = resource_path(json_fileName_ihc)
-        self.json_fileName_sic = resource_path(json_fileName_sic)
+        self.meipass = meipass
+        self.json_fileName_iic = resource_path(json_fileName_iic, self.meipass)
+        self.json_fileName_ihc = resource_path(json_fileName_ihc, self.meipass)
+        self.json_fileName_sic = resource_path(json_fileName_sic, self.meipass)
         self.shippingHTMLFile = shippingHTMLFile
         self.currentUser = user
         self._ItemsSold = None

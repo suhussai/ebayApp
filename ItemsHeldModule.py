@@ -1,26 +1,12 @@
 import json, os
-#from pathFunction import resource_path
-
-def resource_path(relative_path):
-    """
-    function from:
-    http://stackoverflow.com/questions/7674790/bundling-data-files-with-pyinstaller-onefile?lq=1
-    User: max
-    """
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
+from pathFunction import resource_path
 
 class ItemsHeldClass:
 
-    def __init__(self, json_fileName, user=""):
-        self.json_fileName = resource_path(json_fileName)
+    def __init__(self, json_fileName, user="", meipass=""):
+        self.meipass = meipass
+        self.json_fileName = resource_path(json_fileName, self.meipass)
+        print(self.json_fileName)
         self.currentUser = user
         try:
             fileHandler = open(self.json_fileName, 'r')
