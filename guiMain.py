@@ -53,7 +53,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.btns = [self.btnUpdateShipping, self.btnGetItemsSold,
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
                      self.btnAddUser, self.btnRefreshRecords,
-                     self.btnExportToSpreadsheet]
+                     self.btnExportToSpreadsheet, self.btnUpdateItemsHeldFromFile,
+                     self.btnAddNewItem, self.btnDeleteItem]
         self.userLabel = QtGui.QLabel(self)
         self.userLabel.setText("Select A User...")
         self.userLabel.setStyleSheet('color: red; font:13pt')
@@ -61,7 +62,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         #print(self.spinBoxDays.value())
 
     def updateItemsHeldFromFile(self):
-        self.setAllButtons(self.btnUpdateItemsHeldFromFile, False)
+        self.setAllButtons(False)
         self.genDialog = genDialog("Updating from file...")
         self.genDialog.formatForGenericActionNotFinished()
 
@@ -81,7 +82,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         export item info records to spread sheet
         """
-        self.setAllButtons(self.btnExportToSpreadsheet, False)
+        self.setAllButtons(False)
         self.genDialog = genDialog("Exporting to Spreadsheet...")
         self.genDialog.formatForGenericActionNotFinished()
 
@@ -98,7 +99,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         """
         - refresh item info records
         """
-        self.setAllButtons(self.btnRefreshRecords, False)
+        self.setAllButtons(False)
         print(self.currentUser)
         self.genDialog = genDialog("Refreshing Records...")
         self.genDialog.formatForGenericActionNotFinished()
@@ -164,7 +165,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         the thread for the
         update shipping process
         """
-        self.setAllButtons(self.btnUpdateShipping, False)
+        self.setAllButtons(False)
         #days, ids = get_credentials_of_selected_user()
         self.genDialog = genDialog("Updating Shipping Info...")
         self.genDialog.formatForGenericActionNotFinished()
@@ -178,21 +179,20 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.get_thread.start()
         print("thread started")
 
-    def setAllButtons(self, exempted_button=None, state_of_all_other_buttons=False):
+    def setAllButtons(self, state_of_all_buttons=False):
         """
         used for setting all other buttons in gui
         to be True or False except a pre specified btn
         """
-        all_other_btns = [btn for btn in self.btns if btn is not exempted_button]
-        for btn in all_other_btns:
-            btn.setEnabled(state_of_all_other_buttons)
+        for btn in self.btns:
+            btn.setEnabled(state_of_all_buttons)
 
     def finished_threading(self):
         """
         to be run when the a threading
         process is completed
         """
-        self.setAllButtons(None, True) # turn on all buttons
+        self.setAllButtons(True) # turn on all buttons
         self.get_thread.terminate() # terminate thread
         if self.genDialog:
             self.genDialog.formatForGenericActionFinished()
@@ -217,7 +217,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.get_thread.terminate()
 
         # release all buttons
-        self.setAllButtons(None, True)
+        self.setAllButtons(True)
 
         # display error in dialog
         # alloted for the thread
@@ -244,7 +244,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
             self.genDialogNoUserSelected.enableOKButton()
             return
 
-        self.setAllButtons(self.btnGetItemsSold, False)
+        self.setAllButtons(False)
         ids, days = self.get_credentials_of_selected_user()
 
         self.get_thread = getItemsSoldThread(days, ids, "FIXME", user=self.currentUser)
