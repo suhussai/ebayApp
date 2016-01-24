@@ -425,7 +425,7 @@ class exportToSpreadsheetThread(QThread):
                 ws.write(row_num, 4, "="+item_record.get('cost_of_item', '0'))
                 ws.write(row_num, 5, item_record.get("ShippingStatus",'Not Found'))
                 ws.write(row_num, 6, "="+"7.00")
-                ws.write(row_num, 7, "="+item_record.get('ShippingLabelCost','0'))
+                ws.write(row_num, 7, "="+str(item_record.get('ShippingLabelCost','0')).replace("$",""))
                 ws.write_formula(row_num, 8, "=0.3 + 0.029*E"+str(row_num+1))
                 ws.write_formula(row_num, 9, "=0.1*D"+str(row_num+1))
                 ws.write_formula(row_num, 10, "=E"+str(row_num+1)+"+I"+str(row_num+1)+"+G"+str(row_num+1)+"+H"+str(row_num+1)+"+J"+str(row_num+1))
