@@ -48,7 +48,7 @@ class ItemsHeldClass:
 
     def delete_entry(self, long_name):
         self.get_users_main_record().pop(long_name.replace(" ", ""), None)
-
+        self.update_json_file()
     def get_short_name(self, long_name):
         value = self.get_users_main_record().get(long_name.replace(" ", ""), None)
         if value is not None:
