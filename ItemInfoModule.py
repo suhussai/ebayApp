@@ -2,7 +2,7 @@ from ebaysdk.trading import Connection as Trading
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
 from requests.exceptions import Timeout
-import json, re
+import json, re, os
 #from pathFunction import resource_path
 
 def resource_path(relative_path):
