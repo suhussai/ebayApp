@@ -1,4 +1,4 @@
-import json
+import json, os
 #from pathFunction import resource_path
 
 def resource_path(relative_path):
