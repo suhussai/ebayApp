@@ -49,6 +49,10 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
                      self.btnSelectAsCurrentUser, self.btnDeleteUser,
                      self.btnAddUser, self.btnRefreshRecords,
                      self.btnExportToSpreadsheet]
+        self.userLabel = QtGui.QLabel(self)
+        self.userLabel.setText("Select A User...")
+        self.userLabel.setStyleSheet('color: red; font:13pt')
+        self.statusBar().addWidget(self.userLabel)
         #print(self.spinBoxDays.value())
 
 
@@ -239,6 +243,8 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.currentUser = str(selected_user.text())
         self.currentUserCredentials = self.users[self.currentUser]
         self.display_items_held_tree()
+        self.userLabel.setText("User: %s" %(self.currentUser))
+        self.userLabel.setStyleSheet('color: green; font:13pt')
         print(self.currentUser)
         print(self.currentUserCredentials)
 
@@ -289,7 +295,6 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         fileHandler.close()
 
     def display_items_held_tree(self):
-        print("Clearing treee ??")
         self.treeItemsHeld.clear()
         self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser)
         item_records = self.itemsHeldClassHandler.get_records().values()
@@ -399,19 +404,42 @@ class exportToSpreadsheetThread(QThread):
             ws.write(row_num, 11, "")
             ws.write(row_num, 12, "")
             row_num += 1
+            ws.write(row_num, 0, "")
+            ws.write(row_num, 1, "")
+            ws.write(row_num, 2, "")
+            ws.write(row_num, 3, "")
+            ws.write(row_num, 4, "")
+            ws.write(row_num, 5, "")
+            ws.write(row_num, 6, "")
+            ws.write(row_num, 7, "")
+            ws.write(row_num, 8, "")
+            ws.write(row_num, 9, "")
+            ws.write(row_num, 10, "")
+            ws.write(row_num, 11, "")
+            ws.write(row_num, 12, "")
+            row_num += 1
+
             ws.write(row_num, 0, "Totals")
             ws.write(row_num, 1, "---")
             ws.write(row_num, 2, "---")
-            ws.write(row_num, 3, "=SUM(D%s:D%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 4, "=SUM(E%s:E%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 3, "=SUM(D%s:D%s)" %(str(starting_row+1), str(row_num-2)))
+            ws.write(row_num, 4, "=SUM(E%s:E%s)" %(str(starting_row+1), str(row_num-2)))
             ws.write(row_num, 5, "---")
-            ws.write(row_num, 6, "=SUM(G%s:G%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 7, "=SUM(H%s:H%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 8, "=SUM(I%s:I%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 9, "=SUM(J%s:J%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 10, "=SUM(K%s:K%s)" %(str(starting_row+1), str(row_num-1)))
-            ws.write(row_num, 11, "=SUM(L%s:L%s)" %(str(starting_row+1), str(row_num-1)))
+            ws.write(row_num, 6, "=SUM(G%s:G%s)" %(str(starting_row+1), str(row_num-2)))
+            ws.write(row_num, 7, "=SUM(H%s:H%s)" %(str(starting_row+1), str(row_num-2)))
+            ws.write(row_num, 8, "=SUM(I%s:I%s)" %(str(starting_row+1), str(row_num-2)))
+            ws.write(row_num, 9, "=SUM(J%s:J%s)" %(str(starting_row+1), str(row_num-2)))
+            ws.write(row_num, 10, "=SUM(K%s:K%s)" %(str(starting_row+1), str(row_num-2)))
+            ws.write(row_num, 11, "=SUM(L%s:L%s)" %(str(starting_row+1), str(row_num-2)))
             ws.write(row_num, 12, "---")
+            row_num += 1
+            ws.write(row_num + 2, 0, "User's Share")
+            ws.write(row_num + 4, 0, "Managers's Share")
+            ws.write(row_num + 6, 0, "User Owes To Manager")
+
+            ws.write(row_num + 2, 2, "=0.75*L%s" % (str(row_num)))
+            ws.write(row_num + 4, 2, "=0.25*L%s" % (str(row_num)))
+            ws.write(row_num + 6, 2, "=E%s + G%s + 0.25*L%s"% (str(row_num), str(row_num), str(row_num)))
 
 
             wb.close()
@@ -528,3 +556,10 @@ if __name__ == '__main__':
 # http://stackoverflow.com/questions/13269936/python-qt-progressbar
 # https://www.daniweb.com/programming/software-development/threads/406217/how-do-i-enabledisable-pyqt-pushbutton
 # http://nullege.com/codes/search/PyQt4.QtGui.QPushButton.hide
+# http://stackoverflow.com/questions/11677604/updating-pyqt-status-bar-widget
+# http://www.bogotobogo.com/Qt/Qt5_QStatusBar.php
+# http://stackoverflow.com/questions/8577610/pyqt-give-color-to-a-specific-element
+# http://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
+# User: Jonathon Reinhart
+# https://forum.qt.io/topic/19826/qlabel-set-text-size-help/2
+# User: Rahul Das
