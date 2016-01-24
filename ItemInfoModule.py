@@ -120,7 +120,12 @@ class ItemInfoClass:
                                             }
                                         }
                                     )
-            soldListDict = response.dict()['SoldList']
+            soldListDict = response.dict().get('SoldList', None)
+            if (soldListDict is None):
+                self.recordedItems = {}
+                self.unrecordedItems = {}
+                return
+
             numberOfPagesDict = soldListDict['PaginationResult']
             numberOfPages = int(numberOfPagesDict['TotalNumberOfPages'])
             if pageNumber < numberOfPages:
@@ -285,7 +290,6 @@ class ItemInfoClass:
         # the items sold, remove the order item
         # ids that we already have records for
         # in the json file to reduce operation time
-
         if len(unrecordedOrderIDList) > 0:
             # updating required
             # we have items with incomplete
