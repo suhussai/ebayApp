@@ -65,10 +65,19 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setAllButtons(False)
         self.genDialog = genDialog("Updating from file...")
         self.genDialog.formatForGenericActionNotFinished()
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
 
-        self.get_thread = updateItemsHeldFromFileThread(fileName=self.items_held_update_file, user=self.currentUser)
+        ihc = ItemsHeldClass("ItemsHeld.json", user=self.currentUser,
+                             meipass=mpass)
+
+        self.get_thread = updateItemsHeldFromFileThread(fileName=self.items_held_update_file,
+                                                        user=self.currentUser,
+                                                        heldHandler=ihc)
         self.connect(self.get_thread,
-                     SIGNAL('finished_threading()'),
+                     SIGNAL('finished_threading(PyQt_PyObject)'),
                      self.finished_threading)
         self.connect(self.get_thread,
                      SIGNAL('display_items_held_tree()'),
@@ -86,9 +95,17 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.genDialog = genDialog("Exporting to Spreadsheet...")
         self.genDialog.formatForGenericActionNotFinished()
 
-        self.get_thread = exportToSpreadsheetThread(self.currentUser)
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
+
+        iic = ItemInfoClass("ItemInfo.json", ids="Not needed",
+                                user=self.currentUser, meipass=mpass)
+
+        self.get_thread = exportToSpreadsheetThread(self.currentUser, itemHandler=iic)
         self.connect(self.get_thread,
-                     SIGNAL('finished_threading()'),
+                     SIGNAL('finished_threading(PyQt_PyObject)'),
                      self.finished_threading)
         self.connect(self.get_thread,
                      SIGNAL('errorHandlingForThreads(QString)'),
@@ -103,10 +120,17 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         print(self.currentUser)
         self.genDialog = genDialog("Refreshing Records...")
         self.genDialog.formatForGenericActionNotFinished()
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
 
-        self.get_thread = refreshRecordsThread(self.currentUser)
+        iic = ItemInfoClass("ItemInfo.json", ids="Not None",
+                            user=self.currentUser, meipass=mpass)
+
+        self.get_thread = refreshRecordsThread(self.currentUser, itemHandler=iic)
         self.connect(self.get_thread,
-                     SIGNAL('finished_threading()'),
+                     SIGNAL('finished_threading(PyQt_PyObject)'),
                      self.finished_threading)
         self.connect(self.get_thread,
                      SIGNAL('errorHandlingForThreads(QString)'),
@@ -169,9 +193,16 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         #days, ids = get_credentials_of_selected_user()
         self.genDialog = genDialog("Updating Shipping Info...")
         self.genDialog.formatForGenericActionNotFinished()
-        self.get_thread = updateShippingInfoThread(self.targetHtmlFile, user=self.currentUser)
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
+
+        sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile, user=self.currentUser, meipass=mpass)
+
+        self.get_thread = updateShippingInfoThread(self.targetHtmlFile, user=self.currentUser, shippingHandler=sic)
         self.connect(self.get_thread,
-                     SIGNAL('finished_threading()'),
+                     SIGNAL('finished_threading(PyQt_PyObject)'),
                      self.finished_threading)
         self.connect(self.get_thread,
                      SIGNAL('errorHandlingForThreads(QString)'),
@@ -187,11 +218,13 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         for btn in self.btns:
             btn.setEnabled(state_of_all_buttons)
 
-    def finished_threading(self):
+    def finished_threading(self, handler):
         """
         to be run when the a threading
         process is completed
         """
+        print(handler)
+        handler.update_json_file()
         self.setAllButtons(True) # turn on all buttons
         self.get_thread.terminate() # terminate thread
         if self.genDialog:
@@ -247,10 +280,17 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setAllButtons(False)
         ids, days = self.get_credentials_of_selected_user()
 
-        self.get_thread = getItemsSoldThread(days, ids, "FIXME", user=self.currentUser)
+        try:
+            mpass = sys._MEIPASS
+        except:
+            mpass = ""
+        iic = ItemInfoClass("ItemInfo.json",  ids=ids,
+                            user=self.currentUser, meipass=mpass)
+
+        self.get_thread = getItemsSoldThread(days, user=self.currentUser, itemHandler=iic)
         #self.connect(self.get_thread, SIGNAL('update_items_sold_tree(QString, QString)'), self.update_items_sold_tree)
         self.connect(self.get_thread,
-                     SIGNAL('finished_threading()'),
+                     SIGNAL('finished_threading(PyQt_PyObject)'),
                      self.finished_threading)
         self.connect(self.get_thread,
                      SIGNAL('errorHandlingForThreads(QString)'),
@@ -345,10 +385,11 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
                                   formatted_records)
 
 class updateShippingInfoThread(QThread):
-    def __init__(self,targetHtmlFile, user=""):
+    def __init__(self,targetHtmlFile, user="", shippingHandler=None):
         QThread.__init__(self)
         self.targetHtmlFile = targetHtmlFile
         self.currentUser = user
+        self.shippingHandler = shippingHandler
     def __del__(self):
         self.wait()
 
@@ -361,14 +402,8 @@ class updateShippingInfoThread(QThread):
         - destroy thread
         """
         try:
-            try:
-                mpass = sys._MEIPASS
-            except:
-                mpass = ""
-
-            sic = ShippingInfoClass("ShippingInfo.json", self.targetHtmlFile, user=self.currentUser, meipass=mpass)
-            sic.update_ShippingInfo_and_file()
-            self.emit(SIGNAL('finished_threading()'))
+            self.shippingHandler.update_ShippingInfo_and_file()
+            self.emit(SIGNAL('finished_threading(PyQt_PyObject)'), self.shippingHandler)
         except Exception as e:
             print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
@@ -376,9 +411,10 @@ class updateShippingInfoThread(QThread):
 
 
 class exportToSpreadsheetThread(QThread):
-    def __init__(self, currentUser=""):
+    def __init__(self, currentUser="", itemHandler=None):
         QThread.__init__(self)
         self.currentUser = currentUser
+        self.itemHandler = itemHandler
     def __del__(self):
         self.wait()
 
@@ -387,14 +423,7 @@ class exportToSpreadsheetThread(QThread):
             #print("freed!!!!!")
             #print(self.items)
             # Step 2: write to excel file
-            try:
-                mpass = sys._MEIPASS
-            except:
-                mpass = ""
-                
-            iic = ItemInfoClass("ItemInfo.json", ids="Not needed",
-                                user=self.currentUser, meipass=mpass)
-            self.items = sorted(iic.get_all_records().items())
+            self.items = sorted(self.itemHandler.get_all_records().items())
 
             wb = xlsxwriter.Workbook(self.currentUser + "_output.xlsx")
             ws = wb.add_worksheet()
@@ -487,89 +516,69 @@ class exportToSpreadsheetThread(QThread):
 
 
             wb.close()
-            self.emit(SIGNAL('finished_threading()'))
+            self.emit(SIGNAL('finished_threading(PyQt_PyObject)'), self.itemHandler)
         except Exception as e:
             print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 
 class refreshRecordsThread(QThread):
-    def __init__(self, currentUser):
+    def __init__(self, currentUser="", itemHandler=None):
         QThread.__init__(self)
         self.currentUser = currentUser
+        self.itemHandler = itemHandler
     def __del__(self):
         self.wait()
 
     def run(self):
         try:
-            try:
-                mpass = sys._MEIPASS
-            except:
-                mpass = ""
-
-            iic = ItemInfoClass("ItemInfo.json", ids="Not None",
-                                user=self.currentUser, meipass=mpass)
-            iic.refresh_records_held()
-            self.emit(SIGNAL("finished_threading()"))
+            self.itemHandler.refresh_records_held()
+            self.emit(SIGNAL("finished_threading(PyQt_PyObject)"), self.itemHandler)
         except Exception as e:
             print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class updateItemsHeldFromFileThread(QThread):
-    def __init__(self, fileName="items.txt", user=""):
+    def __init__(self, fileName="items.txt", user="", heldHandler=None):
         QThread.__init__(self)
         self.currentUser = user
         self.fileName = fileName
+        self.heldHandler = heldHandler
     def __del__(self):
         self.wait()
 
     def run(self):
         try:
-            try:
-                mpass = sys._MEIPASS
-            except:
-                mpass = ""
-
-            ihc = ItemsHeldClass("ItemsHeld.json", user=self.currentUser,
-                                 meipass=mpass)
-            ihc.update_ItemsHeld_and_file(self.fileName)
+            self.heldHandler.update_ItemsHeld_and_file(self.fileName)
             self.emit(SIGNAL("display_items_held_tree()"))
-            self.emit(SIGNAL("finished_threading()"))
+            self.emit(SIGNAL("finished_threading(PyQt_PyObject)"), self.heldHandler)
         except Exception as e:
             print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class itemsSoldThread(QThread):
-    def __init__(self, days, ids, user=""):
+    def __init__(self, days, user="", itemHandler=None):
         QThread.__init__(self)
         self.days = days
-        self.ids = ids
         self.currentUser = user
+        self.itemHandler = itemHandler
     def __del__(self):
         self.wait()
 
     def run(self):
         try:
-            try:
-                mpass = sys._MEIPASS
-            except:
-                mpass = ""
-
-            iic = ItemInfoClass("ItemInfo.json",  ids=self.ids,
-                                user=self.currentUser, meipass=mpass)
-            items = sorted(iic.get_new_items_sold(self.days).items())
-            self.emit(SIGNAL("update_items(PyQt_PyObject)"), items)
+            items = self.itemHandler.get_new_items_sold(self.days)
+            self.emit(SIGNAL("update_items(PyQt_PyObject)"), self.itemHandler)
         except Exception as e:
             print(e)
             self.emit(SIGNAL("errorHandlingForThreads(QString)"), str(e))
 
 class getItemsSoldThread(QThread):
-    def __init__(self, days, ids, spreadsheetName, user=""):
+    def __init__(self, days, user="", itemHandler=None):
         QThread.__init__(self)
         self.days = days
-        self.ids = ids
-        self.spreadsheetName = spreadsheetName
         self.currentUser = user
+        self.itemHandler = itemHandler
     def __del__(self):
         self.wait()
 
@@ -583,7 +592,8 @@ class getItemsSoldThread(QThread):
 
     def update_items(self, items):
         print("got items")
-        self.items = items
+        self.itemHandler = items
+        self.working = False
         self.new_items_sold_thread.terminate()
 
     def run(self):
@@ -595,7 +605,7 @@ class getItemsSoldThread(QThread):
         - destroy thread
         """
 
-        self.new_items_sold_thread = itemsSoldThread(self.days, self.ids, user=self.currentUser)
+        self.new_items_sold_thread = itemsSoldThread(self.days, user=self.currentUser, itemHandler=self.itemHandler)
         self.connect(self.new_items_sold_thread,
                      SIGNAL('update_items(PyQt_PyObject)'),
                      self.update_items)
@@ -607,7 +617,8 @@ class getItemsSoldThread(QThread):
         #empty = "empty"
         self.items = 0
         progressValue = 0
-        while(self.items is 0):
+        self.working = True
+        while(self.working):
             print("sleeping")
             time.sleep(0.5)
             if (progressValue <= 70):
@@ -617,7 +628,7 @@ class getItemsSoldThread(QThread):
 
         progressValue = 100
         self.emitNewProgressValue(progressValue)
-        self.emit(SIGNAL('finished_threading()'))
+        self.emit(SIGNAL('finished_threading(PyQt_PyObject)'), self.itemHandler)
 
 def main():
     app = QtGui.QApplication(sys.argv)

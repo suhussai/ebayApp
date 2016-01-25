@@ -70,7 +70,7 @@ class ShippingInfoClass:
 
     def add_entry(self, key, value):
         self.get_users_main_record()[key] = value
-        self._update_json_file()
+        self.update_json_file()
 
     def delete_entry(self, key):
         if self.get_users_main_record().pop(key, None) is None:
@@ -78,9 +78,9 @@ class ShippingInfoClass:
             # thus we dont need to update json file
             return
         else:
-            self._update_json_file()
+            self.update_json_file()
 
-    def _update_json_file(self):
+    def update_json_file(self):
         """
         update main json file by
         overwriting its contents
@@ -150,7 +150,7 @@ class ShippingInfoClass:
                                                   name}
         count_after = len(self.get_users_main_record())
         print("Count before: %d and after: %d, resulting in an increase of %d entries/entry." %(count_before, count_after, count_after-count_before))
-        self._update_json_file()
+        self.update_json_file()
 
 
     #print(shippingInfo)

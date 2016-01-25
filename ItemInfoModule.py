@@ -2,7 +2,7 @@ from ebaysdk.trading import Connection as Trading
 from ShippingInfoModule import ShippingInfoClass
 from ItemsHeldModule import ItemsHeldClass
 from requests.exceptions import Timeout
-import json, re, os
+import json, re, os, copy
 from pathFunction import resource_path
 
 class ItemInfoClass:
@@ -46,7 +46,9 @@ class ItemInfoClass:
 
     def get_users_main_record(self):
         if self._ItemsSold.get(self.currentUser, None) is None:
+            print("did not find user %s" %(self.currentUser))
             self._ItemsSold[self.currentUser] = {}
+        print("returning %s" %(str(self._ItemsSold[self.currentUser])) )
         return self._ItemsSold[self.currentUser]
 
     def get_all_records(self):
@@ -59,7 +61,7 @@ class ItemInfoClass:
 
     def add_entry(self, orderID, itemInfo_dict):
         self.get_users_main_record()[orderID] = itemInfo_dict
-        self._update_json_file()
+        self.update_json_file()
 
     def delete_entry(self, orderID):
         if self.get_users_main_record().pop(orderID, None) is None:
@@ -67,9 +69,9 @@ class ItemInfoClass:
             # thus we dont need to update json file
             return
         else:
-            self._update_json_file()
+            self.update_json_file()
 
-    def _update_json_file(self):
+    def update_json_file(self):
         """
         updates the underlying json file with the
         records currently held in the _ItemsSold variable.
@@ -203,6 +205,8 @@ class ItemInfoClass:
                 self.unrecordedItems[orderID]['ItemName'] = item_name
                 self.unrecordedItems[orderID]['ItemPrice'] = item_total_price
                 self.unrecordedItems[orderID]['ItemTrackingNumber'] = item_tracking_number
+                print("---------------------------------------------------")
+                print(order_date)
                 self.unrecordedItems[orderID]['ItemDate'] = order_date #[:order_date.find("T")]
 
 
@@ -266,7 +270,7 @@ class ItemInfoClass:
         """
         self._append_shipping_info_to_records(self.get_users_main_record())
         self._append_name_info_to_records(self.get_users_main_record())
-        self._update_json_file()
+        self.update_json_file()
 
     def get_new_items_sold(self, days):
         """
@@ -303,7 +307,7 @@ class ItemInfoClass:
         self._append_name_info_to_records(self.recordedItems)
         # add new unrecorded items to the record
         self.get_users_main_record().update(self.unrecordedItems)
-        self._update_json_file()
+        #self._update_json_file()
         # requestedItems will be all the items
         # that are found to be sold in the
         # 'days' as specified
@@ -355,14 +359,18 @@ class ItemInfoClass:
         working_dict = {}
         items_sold_by_date = {}
         if self.requestedItemsSold:
-            working_dict = self.requestedItemsSold
+            working_dict = copy.deepcopy(self.requestedItemsSold)
         else:
-            working_dict = self.get_users_main_record()
+            working_dict = copy.deepcopy(self.get_users_main_record())
 
+        print(working_dict)
+        print("--------------")
         for orderID, item_record in working_dict.iteritems():
             if item_record.get('ItemDate', False):
                 items_sold_by_date[item_record['ItemDate']] = item_record
                 del items_sold_by_date[item_record['ItemDate']]['ItemDate']
+        print(items_sold_by_date)
+        print("/////////////////////")
         return items_sold_by_date
 
 
