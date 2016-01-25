@@ -652,3 +652,4 @@ if __name__ == '__main__':
 # User: Rahul Das
 # Threading issue on windows:
 # https://msdn.microsoft.com/en-us/library/windows/desktop/dd744765(v=vs.85).aspx
+# http://stackoverflow.com/questions/11488523/how-do-you-get-a-decimal-in-pythona
