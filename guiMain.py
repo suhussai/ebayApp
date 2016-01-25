@@ -615,15 +615,15 @@ class getItemsSoldThread(QThread):
         print("thread started")
         #empty = "empty"
         self.items = 0
-        progressValue = 0
+        progressValue = 0.0
         self.working = True
         while(self.working):
             print("sleeping")
             time.sleep(0.5)
-            if (progressValue <= 70):
+            if (progressValue < 95):
                 print("changing to " + str(progressValue))
-                progressValue += (70)/self.days
-                self.emitNewProgressValue(progressValue)
+                progressValue += (15.0)/float(self.days)
+                self.emitNewProgressValue(int(progressValue))
 
         progressValue = 100
         self.emitNewProgressValue(progressValue)
