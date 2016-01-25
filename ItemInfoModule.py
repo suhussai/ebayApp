@@ -46,9 +46,7 @@ class ItemInfoClass:
 
     def get_users_main_record(self):
         if self._ItemsSold.get(self.currentUser, None) is None:
-            print("did not find user %s" %(self.currentUser))
             self._ItemsSold[self.currentUser] = {}
-        print("returning %s" %(str(self._ItemsSold[self.currentUser])) )
         return self._ItemsSold[self.currentUser]
 
     def get_all_records(self):
@@ -196,7 +194,7 @@ class ItemInfoClass:
                             item_tracking_number.append(shipping_detail['ShipmentTrackingNumber'])
 
                     else:
-                        print(transaction)
+                        #print(transaction)
                         print(transaction['ShippingDetails'])
 
                 # add information to the dictionary
@@ -205,8 +203,6 @@ class ItemInfoClass:
                 self.unrecordedItems[orderID]['ItemName'] = item_name
                 self.unrecordedItems[orderID]['ItemPrice'] = item_total_price
                 self.unrecordedItems[orderID]['ItemTrackingNumber'] = item_tracking_number
-                print("---------------------------------------------------")
-                print(order_date)
                 self.unrecordedItems[orderID]['ItemDate'] = order_date #[:order_date.find("T")]
 
 
@@ -363,14 +359,10 @@ class ItemInfoClass:
         else:
             working_dict = copy.deepcopy(self.get_users_main_record())
 
-        print(working_dict)
-        print("--------------")
         for orderID, item_record in working_dict.iteritems():
             if item_record.get('ItemDate', False):
                 items_sold_by_date[item_record['ItemDate']] = item_record
                 del items_sold_by_date[item_record['ItemDate']]['ItemDate']
-        print(items_sold_by_date)
-        print("/////////////////////")
         return items_sold_by_date
 
 

@@ -223,7 +223,6 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         to be run when the a threading
         process is completed
         """
-        print(handler)
         handler.update_json_file()
         self.setAllButtons(True) # turn on all buttons
         self.get_thread.terminate() # terminate thread
