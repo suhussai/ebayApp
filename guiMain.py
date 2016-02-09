@@ -25,7 +25,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.currentUserCredentials = None
         self.display_items_held_tree()
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
 
@@ -66,7 +66,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.genDialog = genDialog("Updating from file...")
         self.genDialog.formatForGenericActionNotFinished()
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
 
@@ -96,7 +96,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.genDialog.formatForGenericActionNotFinished()
 
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
 
@@ -121,7 +121,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.genDialog = genDialog("Refreshing Records...")
         self.genDialog.formatForGenericActionNotFinished()
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
 
@@ -143,7 +143,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         delete item held in items held records
         """
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
         self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser, meipass=mpass)
@@ -165,7 +165,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         Note: quick process, separate thread not required
         """
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
 
@@ -194,7 +194,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         self.genDialog = genDialog("Updating Shipping Info...")
         self.genDialog.formatForGenericActionNotFinished()
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
 
@@ -280,7 +280,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
         ids, days = self.get_credentials_of_selected_user()
 
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
         iic = ItemInfoClass("ItemInfo.json",  ids=ids,
@@ -366,7 +366,7 @@ class eBayApp(QtGui.QMainWindow, design.Ui_MainWindow):
     def display_items_held_tree(self):
         self.treeItemsHeld.clear()
         try:
-            mpass = sys._MEIPASS
+            mpass = ""
         except:
             mpass = ""
         self.itemsHeldClassHandler = ItemsHeldClass("ItemsHeld.json", user=self.currentUser, meipass=mpass)
