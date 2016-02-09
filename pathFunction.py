@@ -7,8 +7,9 @@ def resource_path(relative_path, meipass):
     User: max
     """
     """ Get absolute path to resource, works for dev and for PyInstaller """
-    if meipass is "":
-        base_path = os.path.abspath(".")
-    else:
-        base_path = meipass
-    return os.path.join(base_path, relative_path)
+    return relative_path
+    #if meipass is "":
+    #    base_path = os.path.abspath(".")
+    #else:
+    #    base_path = meipass
+    #return os.path.join(base_path, relative_path)
